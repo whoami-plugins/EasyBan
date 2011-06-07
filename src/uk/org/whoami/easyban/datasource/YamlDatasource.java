@@ -50,7 +50,7 @@ public class YamlDatasource implements Datasource {
 
     @Override
     @SuppressWarnings("unchecked")
-    public void addIpToHistory(String nick, String ip) {
+    public synchronized void addIpToHistory(String nick, String ip) {
         HashMap<String, List<String>> history =
                 (HashMap<String, List<String>>) banFile.getProperty(historyPath);
 
@@ -67,7 +67,7 @@ public class YamlDatasource implements Datasource {
 
     @Override
     @SuppressWarnings("unchecked")
-    public void banNick(String nick) {
+    public synchronized void banNick(String nick) {
         List<String> bans = (List<String>) banFile.getProperty(banPath);
 
         if (!bans.contains(nick)) {
@@ -78,7 +78,7 @@ public class YamlDatasource implements Datasource {
 
     @Override
     @SuppressWarnings("unchecked")
-    public void unbanNick(String nick) {
+    public synchronized void unbanNick(String nick) {
         List<String> bans = (List<String>) banFile.getProperty(banPath);
 
         if (bans.contains(nick)) {
@@ -89,7 +89,7 @@ public class YamlDatasource implements Datasource {
 
     @Override
     @SuppressWarnings("unchecked")
-    public void banSubnet(String subnet) {
+    public synchronized void banSubnet(String subnet) {
         List<String> subnets = (List<String>) banFile.getProperty(subnetPath);
         if (!subnets.contains(subnet)) {
             subnets.add(subnet);
@@ -99,7 +99,7 @@ public class YamlDatasource implements Datasource {
 
     @Override
     @SuppressWarnings("unchecked")
-    public void unbanSubnet(String subnet) {
+    public synchronized void unbanSubnet(String subnet) {
         List<String> subnets = (List<String>) banFile.getProperty(subnetPath);
         subnets.remove(subnet);
         banFile.save();
@@ -107,7 +107,7 @@ public class YamlDatasource implements Datasource {
 
     @Override
     @SuppressWarnings("unchecked")
-    public boolean isIpBanned(String ip) {
+    public synchronized boolean isIpBanned(String ip) {
         HashMap<String, List<String>> history =
                 (HashMap<String, List<String>>) banFile.getProperty(historyPath);
         List<String> bans = (List<String>) banFile.getProperty(banPath);
@@ -135,7 +135,7 @@ public class YamlDatasource implements Datasource {
 
     @Override
     @SuppressWarnings("unchecked")
-    public boolean isNickBanned(String nick) {
+    public synchronized boolean isNickBanned(String nick) {
         List<String> bans = (List<String>) banFile.getProperty(banPath);
         if (bans.contains(nick)) {
             return true;

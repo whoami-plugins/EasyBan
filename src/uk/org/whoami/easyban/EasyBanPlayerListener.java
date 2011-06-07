@@ -19,15 +19,16 @@ import uk.org.whoami.easyban.datasource.Datasource;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerListener;
+import org.bukkit.plugin.java.JavaPlugin;
 
 public class EasyBanPlayerListener extends PlayerListener {
 
     private Datasource database;
-    private Messages msg;
+    private JavaPlugin parent;
 
-    public EasyBanPlayerListener(Datasource database,Messages msg) {
+    public EasyBanPlayerListener(Datasource database, JavaPlugin plugin) {
         this.database = database;
-        this.msg = msg;
+        this.parent = plugin;
     }
 
     @Override
@@ -38,8 +39,9 @@ public class EasyBanPlayerListener extends PlayerListener {
 
         database.addIpToHistory(name, ip);
 
-        if(database.isNickBanned(name) || database.isIpBanned(ip)) {
-            player.kickPlayer("Kebab has been removed from premises");
+        if (database.isNickBanned(name) || database.isIpBanned(ip)) {
+            player.kickPlayer(Message.getMessage("You have been banned",
+                    parent.getConfiguration()));
         }
     }
 }

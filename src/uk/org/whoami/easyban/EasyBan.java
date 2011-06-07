@@ -19,7 +19,6 @@ import uk.org.whoami.easyban.datasource.Datasource;
 import uk.org.whoami.easyban.datasource.YamlDatasource;
 import com.nijiko.permissions.PermissionHandler;
 import com.nijikokun.bukkit.Permissions.Permissions;
-import java.io.File;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -27,26 +26,17 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.util.config.Configuration;
 import uk.org.whoami.easyban.util.Network;
 
 public class EasyBan extends JavaPlugin {
 
     private Datasource database;
-    private Configuration config;
     private PermissionHandler permissionHandler;
-    private Messages msg = null;
 
     private void initConfig() {
-        config = new Configuration(new File(this.getDataFolder(),
-                "easyban.yml"));
-        config.load();
-        if (config.getProperty("database") == null) {
-            config.setProperty("database", "yaml");
-            config.save();
-        }
-        if(msg == null) {
-            msg = new Messages(this);
+        if (this.getConfiguration().getProperty("database") == null) {
+            this.getConfiguration().setProperty("database", "yaml");
+            this.getConfiguration().save();
         }
     }
 
@@ -59,15 +49,16 @@ public class EasyBan extends JavaPlugin {
     public void onEnable() {
         initConfig();
         setupPermission();
-        if (config.getProperty("database").equals("yaml")) {
+        if (this.getConfiguration().getProperty("database").equals("yaml")) {
             database = new YamlDatasource(this);
         } else {
             this.getServer().getPluginManager().disablePlugin(this);
         }
         this.getServer().getPluginManager().registerEvent(
-                Event.Type.PLAYER_JOIN, new EasyBanPlayerListener(database,msg),
+                Event.Type.PLAYER_JOIN, new EasyBanPlayerListener(database, this),
                 Event.Priority.Low, this);
-        System.out.println(msg.getMessage("EasyBan enabled"));
+        System.out.println(Message.getMessage("EasyBan enabled",
+                this.getConfiguration()));
     }
 
     @Override
@@ -89,8 +80,10 @@ public class EasyBan extends JavaPlugin {
             if (player != null) {
                 this.getServer().broadcastMessage(ChatColor.RED
                         + player.getDisplayName()
-                        + msg.getMessage("has been kicked"));
-                player.kickPlayer(msg.getMessage("You have been kicked"));
+                        + Message.getMessage("has been kicked",
+                        this.getConfiguration()));
+                player.kickPlayer(Message.getMessage("You have been kicked",
+                        this.getConfiguration()));
             }
             return true;
         }
@@ -104,13 +97,16 @@ public class EasyBan extends JavaPlugin {
                 database.banNick(args[0]);
                 this.getServer().broadcastMessage(ChatColor.RED
                         + args[0]
-                        + msg.getMessage("has been banned"));
+                        + Message.getMessage("has been banned",
+                        this.getConfiguration()));
             } else {
                 database.banNick(player.getName());
                 this.getServer().broadcastMessage(ChatColor.RED
                         + player.getDisplayName()
-                        + msg.getMessage("has been banned"));
-                player.kickPlayer(msg.getMessage("You have been banned"));
+                        + Message.getMessage("has been banned",
+                        this.getConfiguration()));
+                player.kickPlayer(Message.getMessage("You have been banned",
+                        this.getConfiguration()));
             }
             return true;
         }
@@ -121,7 +117,8 @@ public class EasyBan extends JavaPlugin {
             }
             database.unbanNick(args[0]);
             this.getServer().broadcastMessage(args[0]
-                    + msg.getMessage("has been unbanned"));
+                    + Message.getMessage("has been unbanned",
+                    this.getConfiguration()));
             return true;
         }
 
@@ -133,9 +130,11 @@ public class EasyBan extends JavaPlugin {
                 database.banSubnet(args[0]);
                 this.getServer().broadcastMessage(ChatColor.RED
                         + args[0]
-                        + msg.getMessage("has been banned"));
+                        + Message.getMessage("has been banned",
+                        this.getConfiguration()));
             } else {
-                sender.sendMessage(msg.getMessage("Invalid Subnet"));
+                sender.sendMessage(Message.getMessage("Invalid Subnet",
+                        this.getConfiguration()));
             }
 
             return true;
@@ -147,8 +146,9 @@ public class EasyBan extends JavaPlugin {
             }
             database.unbanSubnet(args[0]);
             this.getServer().broadcastMessage(ChatColor.RED
-                        + args[0]
-                        + msg.getMessage("has been unbanned"));
+                    + args[0]
+                    + Message.getMessage("has been unbanned",
+                    this.getConfiguration()));
             return true;
         }
         return false;

@@ -15,29 +15,17 @@
  */
 package uk.org.whoami.easyban;
 
-import java.io.File;
-import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.util.config.Configuration;
 
-public class Messages {
+public class Message {
 
-    private Configuration msgFile;
+    public Message() {}
 
-    public Messages(JavaPlugin plugin) {
-        msgFile = new Configuration(new File(plugin.getDataFolder(),
-                "messages.yml"));
-        msgFile.load();
-        if(msgFile.getString("EasyBan enabled") == null) {
-            loadDefaults();
-            msgFile.save();
-        }
-    }
-
-    public String getMessage(String string) {
+    public static String getMessage(String string, Configuration msgFile) {
         return msgFile.getString(string);
     }
 
-    private void loadDefaults() {
+    public static void loadDefaults(Configuration msgFile) {
         msgFile.setProperty("EasyBan enabled", "EasyBan enabled");
         msgFile.setProperty("has been kicked", " has been kicked");
         msgFile.setProperty("You have been kicked", "You have been kicked");
