@@ -16,6 +16,8 @@
 package uk.org.whoami.easyban.datasource;
 
 import java.io.File;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -23,7 +25,7 @@ import java.util.List;
 import java.util.Map;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.util.config.Configuration;
-import uk.org.whoami.easyban.util.Network;
+import uk.org.whoami.easyban.util.Subnet;
 
 public class YamlDatasource implements Datasource {
 
@@ -115,8 +117,15 @@ public class YamlDatasource implements Datasource {
 
         Iterator<String> itl = subnets.iterator();
         while (itl.hasNext()) {
-            if (Network.isIpInSubnet(ip, itl.next())) {
-                return true;
+            try {
+                String[] sub = itl.next().split("/");
+
+                Subnet subnet = new Subnet(InetAddress.getByName(sub[0]),
+                        InetAddress.getByName(sub[1]));
+                if(subnet.isIpInSubnet(InetAddress.getByName(ip))) {
+                    return true;
+                }
+            } catch (UnknownHostException ex) {
             }
         }
 

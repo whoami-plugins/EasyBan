@@ -15,10 +15,12 @@
  */
 package uk.org.whoami.easyban;
 
+import java.net.UnknownHostException;
 import uk.org.whoami.easyban.datasource.Datasource;
 import uk.org.whoami.easyban.datasource.YamlDatasource;
 import com.nijiko.permissions.PermissionHandler;
 import com.nijikokun.bukkit.Permissions.Permissions;
+import java.net.InetAddress;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -26,7 +28,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
-import uk.org.whoami.easyban.util.Network;
+import uk.org.whoami.easyban.util.Subnet;
 
 public class EasyBan extends JavaPlugin {
 
@@ -54,6 +56,7 @@ public class EasyBan extends JavaPlugin {
         } else {
             this.getServer().getPluginManager().disablePlugin(this);
         }
+        Message.loadDefaults(this.getConfiguration());
         this.getServer().getPluginManager().registerEvent(
                 Event.Type.PLAYER_JOIN, new EasyBanPlayerListener(database, this),
                 Event.Priority.Low, this);
@@ -66,12 +69,18 @@ public class EasyBan extends JavaPlugin {
             String label, String[] args) {
         boolean perm = true;
 
+
         if (sender instanceof Player) {
-            if ((permissionHandler == null && !sender.isOp())
+            if (permissionHandler == null
                     || !permissionHandler.has((Player) sender, "easyban." + label)) {
                 perm = false;
             }
         }
+
+        if (sender.isOp()) {
+            perm = true;
+        }
+
         if (label.equals("ekick")) {
             if (args.length == 0 || !perm) {
                 return true;
@@ -126,10 +135,25 @@ public class EasyBan extends JavaPlugin {
             if (args.length == 0 || !perm) {
                 return true;
             }
-            if (Network.isValidSubnet(args[0])) {
-                database.banSubnet(args[0]);
+            String[] sub = args[0].split("/");
+            Subnet subnet = null;
+            if (sub.length == 2) {
+                try {
+                    subnet = new Subnet(InetAddress.getByName(sub[0]),
+                            Integer.parseInt(sub[1]));
+                } catch (UnknownHostException ex) {
+                } catch (NumberFormatException ex) {
+                    try {
+                        subnet = new Subnet(InetAddress.getByName(sub[0]),
+                                InetAddress.getByName(sub[1]));
+                    } catch (UnknownHostException ex1) {
+                    }
+                }
+            }
+            if (subnet != null) {
+                database.banSubnet(subnet.toString());
                 this.getServer().broadcastMessage(ChatColor.RED
-                        + args[0]
+                        + subnet.toString()
                         + Message.getMessage("has been banned",
                         this.getConfiguration()));
             } else {
@@ -144,12 +168,32 @@ public class EasyBan extends JavaPlugin {
             if (args.length == 0 || !perm) {
                 return true;
             }
-            database.unbanSubnet(args[0]);
-            this.getServer().broadcastMessage(ChatColor.RED
-                    + args[0]
-                    + Message.getMessage("has been unbanned",
-                    this.getConfiguration()));
-            return true;
+            String[] sub = args[0].split("/");
+            Subnet subnet = null;
+            if (sub.length == 2) {
+                try {
+                    subnet = new Subnet(InetAddress.getByName(sub[0]),
+                            Integer.parseInt(sub[1]));
+                } catch (UnknownHostException ex) {
+                } catch (NumberFormatException ex) {
+                    try {
+                        subnet = new Subnet(InetAddress.getByName(sub[0]),
+                                InetAddress.getByName(sub[1]));
+                    } catch (UnknownHostException ex1) {
+                    }
+                }
+            }
+            if (subnet != null) {
+                database.unbanSubnet(subnet.toString());
+                this.getServer().broadcastMessage(ChatColor.RED
+                        + args[0]
+                        + Message.getMessage("has been unbanned",
+                        this.getConfiguration()));
+                return true;
+            } else {
+                sender.sendMessage(Message.getMessage("Invalid Subnet",
+                        this.getConfiguration()));
+            }
         }
         return false;
     }

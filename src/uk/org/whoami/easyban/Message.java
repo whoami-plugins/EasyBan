@@ -25,13 +25,17 @@ public class Message {
         return msgFile.getString(string);
     }
 
-    public static void loadDefaults(Configuration msgFile) {
-        msgFile.setProperty("EasyBan enabled", "EasyBan enabled");
-        msgFile.setProperty("has been kicked", " has been kicked");
-        msgFile.setProperty("You have been kicked", "You have been kicked");
-        msgFile.setProperty("has been banned", " has been banned");
-        msgFile.setProperty("You have been banned", "You have been banned");
-        msgFile.setProperty("has been unbanned", " has been unbanned");
-        msgFile.setProperty("Invalid Subnet", "Invalid Subnet");
+    public static synchronized void loadDefaults(Configuration msgFile) {
+        String test = msgFile.getString("EasyBan enabled");
+        if(test == null) {
+            msgFile.setProperty("EasyBan enabled", "EasyBan enabled");
+            msgFile.setProperty("has been kicked", " has been kicked");
+            msgFile.setProperty("You have been kicked", "You have been kicked");
+            msgFile.setProperty("has been banned", " has been banned");
+            msgFile.setProperty("You have been banned", "You have been banned");
+            msgFile.setProperty("has been unbanned", " has been unbanned");
+            msgFile.setProperty("Invalid Subnet", "Invalid Subnet");
+            msgFile.save();
+        }
     }
 }
