@@ -1,6 +1,6 @@
 name: EasyBan
 main: uk.org.whoami.easyban.EasyBan
-version: 0.3
+version: 0.4
 commands:
     ekick:
         description: Kick player
@@ -12,8 +12,17 @@ commands:
         description: Unban player
         usage: /eunban playername
     esubnetban:
-        description: Ban a whole Subnet
+        description: Ban a whole subnet
         usage: /esubnetban a.b.c.d/w.x.y.z
     esubnetunban:
-        description: Unban a whole Subnet
+        description: Unban a whole subnet
         usage: /esubnetunban a.b.c.d/w.x.y.z
+    elistbans:
+        description: List all banned players
+        usage: /elistbans
+    elistsubnets:
+        description: List all banned subnets
+        usage: /elistsubnets
+    elistips:
+        description: List all ips of a player
+        usage: /elistips playername

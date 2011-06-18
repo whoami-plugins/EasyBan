@@ -19,23 +19,45 @@ import org.bukkit.util.config.Configuration;
 
 public class Message {
 
-    public Message() {}
+    public Message() {
+    }
 
     public static String getMessage(String string, Configuration msgFile) {
         return msgFile.getString(string);
     }
 
     public static synchronized void loadDefaults(Configuration msgFile) {
-        String test = msgFile.getString("EasyBan enabled");
-        if(test == null) {
+        if(null == msgFile.getString("EasyBan enabled")) {
             msgFile.setProperty("EasyBan enabled", "EasyBan enabled");
-            msgFile.setProperty("has been kicked", " has been kicked");
-            msgFile.setProperty("You have been kicked", "You have been kicked");
-            msgFile.setProperty("has been banned", " has been banned");
-            msgFile.setProperty("You have been banned", "You have been banned");
-            msgFile.setProperty("has been unbanned", " has been unbanned");
-            msgFile.setProperty("Invalid Subnet", "Invalid Subnet");
-            msgFile.save();
         }
+        if(null == msgFile.getString("has been kicked")) {
+            msgFile.setProperty("has been kicked", " has been kicked");
+        }
+        if(null == msgFile.getString("You have been kicked")) {
+            msgFile.setProperty("You have been kicked", "You have been kicked");
+        }
+        if(null == msgFile.getString("has been banned")) {
+            msgFile.setProperty("has been banned", " has been banned");
+        }
+        if(null == msgFile.getString("You have been banned")) {
+            msgFile.setProperty("You have been banned", "You have been banned");
+        }
+        if(null == msgFile.getString("has been unbanned")) {
+            msgFile.setProperty("has been unbanned", " has been unbanned");
+        }
+        if(null == msgFile.getString("Invalid Subnet")) {
+            msgFile.setProperty("Invalid Subnet", "Invalid Subnet");
+        }
+        if(null == msgFile.getString("Banned players")) {
+            msgFile.setProperty("Banned players", "Banned players");
+        }
+        if(null == msgFile.getString("Banned subnets")) {
+            msgFile.setProperty("Banned subnets", "Banned subnets");
+        }
+        if(null == msgFile.getString("Ips from")) {
+            msgFile.setProperty("Ips from", "Ips from");
+        }
+
+        msgFile.save();
     }
 }

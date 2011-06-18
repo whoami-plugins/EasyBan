@@ -36,7 +36,7 @@ public class EasyBan extends JavaPlugin {
     private PermissionHandler permissionHandler;
 
     private void initConfig() {
-        if (this.getConfiguration().getProperty("database") == null) {
+        if(this.getConfiguration().getProperty("database") == null) {
             this.getConfiguration().setProperty("database", "yaml");
             this.getConfiguration().save();
         }
@@ -51,157 +51,201 @@ public class EasyBan extends JavaPlugin {
     public void onEnable() {
         initConfig();
         setupPermission();
-        if (this.getConfiguration().getProperty("database").equals("yaml")) {
+        if(this.getConfiguration().getProperty("database").equals("yaml")) {
             database = new YamlDatasource(this);
         } else {
             this.getServer().getPluginManager().disablePlugin(this);
         }
         Message.loadDefaults(this.getConfiguration());
-        this.getServer().getPluginManager().registerEvent(
-                Event.Type.PLAYER_JOIN, new EasyBanPlayerListener(database, this),
-                Event.Priority.Low, this);
-        System.out.println(Message.getMessage("EasyBan enabled",
-                this.getConfiguration()));
+        this.getServer().getPluginManager().registerEvent(Event.Type.PLAYER_JOIN,
+                                                          new EasyBanPlayerListener(
+                database, this), Event.Priority.Low, this);
+        System.out.println(Message.getMessage("EasyBan enabled", this.
+                getConfiguration()) + " Version: " + this.getDescription().
+                getVersion());
+
     }
 
     @Override
-    public boolean onCommand(CommandSender sender, Command cmd,
-            String label, String[] args) {
+    public boolean onCommand(CommandSender sender, Command cmd, String label,
+                             String[] args) {
         boolean perm = true;
 
-
-        if (sender instanceof Player) {
-            if (permissionHandler == null
-                    || !permissionHandler.has((Player) sender, "easyban." + label)) {
+        if(sender instanceof Player) {
+            if(permissionHandler == null || !permissionHandler.has(
+                    (Player) sender, "easyban." + label)) {
                 perm = false;
             }
         }
 
-        if (sender.isOp()) {
+        if(sender.isOp()) {
             perm = true;
         }
 
-        if (label.equals("ekick")) {
-            if (args.length == 0 || !perm) {
+        if(label.equals("ekick")) {
+            if(args.length == 0 || !perm) {
                 return true;
             }
             Player player = this.getServer().getPlayer(args[0]);
-            if (player != null) {
-                this.getServer().broadcastMessage(ChatColor.RED
-                        + player.getDisplayName()
-                        + Message.getMessage("has been kicked",
-                        this.getConfiguration()));
+            if(player != null) {
+                this.getServer().broadcastMessage(ChatColor.RED + player.
+                        getDisplayName() + Message.getMessage("has been kicked",
+                                                              this.
+                        getConfiguration()));
                 player.kickPlayer(Message.getMessage("You have been kicked",
-                        this.getConfiguration()));
+                                                     this.getConfiguration()));
             }
             return true;
         }
 
-        if (label.equals("eban")) {
-            if (args.length == 0 || !perm) {
+        if(label.equals("eban")) {
+            if(args.length == 0 || !perm) {
                 return true;
             }
             Player player = this.getServer().getPlayer(args[0]);
-            if (player == null) {
+            if(player == null) {
                 database.banNick(args[0]);
-                this.getServer().broadcastMessage(ChatColor.RED
-                        + args[0]
-                        + Message.getMessage("has been banned",
-                        this.getConfiguration()));
+                this.getServer().broadcastMessage(ChatColor.RED + args[0]
+                                                  + Message.getMessage(
+                        "has been banned", this.getConfiguration()));
             } else {
                 database.banNick(player.getName());
-                this.getServer().broadcastMessage(ChatColor.RED
-                        + player.getDisplayName()
-                        + Message.getMessage("has been banned",
-                        this.getConfiguration()));
+                this.getServer().broadcastMessage(ChatColor.RED + player.
+                        getDisplayName() + Message.getMessage("has been banned",
+                                                              this.
+                        getConfiguration()));
                 player.kickPlayer(Message.getMessage("You have been banned",
-                        this.getConfiguration()));
+                                                     this.getConfiguration()));
             }
             return true;
         }
 
-        if (label.equals("eunban")) {
-            if (args.length == 0 || !perm) {
+        if(label.equals("elistbans")) {
+            if(!perm) {
+                return true;
+            }
+
+            sender.sendMessage(Message.getMessage("Banned players", this.
+                    getConfiguration()) + ":");
+            this.sendListToSender(sender, database.getBannedNicks());
+            return true;
+        }
+
+        if(label.equals("elistsubnets")) {
+            if(!perm) {
+                return true;
+            }
+
+            sender.sendMessage(Message.getMessage("Banned subnets", this.
+                    getConfiguration()) + ":");
+            this.sendListToSender(sender, database.getBannedSubnets());
+            return true;
+        }
+
+        if(label.equals("elistips")) {
+            if(args.length == 0 || !perm) {
+                return true;
+            }
+
+            sender.sendMessage(Message.getMessage("Ips from", this.
+                    getConfiguration()) + " " + args[0]);
+            this.sendListToSender(sender, database.getPlayerIps(args[0]));
+            return true;
+        }
+
+        if(label.equals("eunban")) {
+            if(args.length == 0 || !perm) {
                 return true;
             }
             database.unbanNick(args[0]);
-            this.getServer().broadcastMessage(args[0]
-                    + Message.getMessage("has been unbanned",
-                    this.getConfiguration()));
+            this.getServer().broadcastMessage(args[0] + Message.getMessage(
+                    "has been unbanned", this.getConfiguration()));
             return true;
         }
 
-        if (label.equals("esubnetban")) {
-            if (args.length == 0 || !perm) {
+        if(label.equals("esubnetban")) {
+            if(args.length == 0 || !perm) {
                 return true;
             }
             String[] sub = args[0].split("/");
             Subnet subnet = null;
-            if (sub.length == 2) {
+            if(sub.length == 2) {
                 try {
-                    subnet = new Subnet(InetAddress.getByName(sub[0]),
-                            Integer.parseInt(sub[1]));
-                } catch (UnknownHostException ex) {
-                } catch (NumberFormatException ex) {
+                    subnet = new Subnet(InetAddress.getByName(sub[0]), Integer.
+                            parseInt(sub[1]));
+                } catch(UnknownHostException ex) {
+                } catch(NumberFormatException ex) {
                     try {
                         subnet = new Subnet(InetAddress.getByName(sub[0]),
-                                InetAddress.getByName(sub[1]));
-                    } catch (UnknownHostException ex1) {
+                                            InetAddress.getByName(sub[1]));
+                    } catch(UnknownHostException ex1) {
                     }
                 }
             }
-            if (subnet != null) {
+            if(subnet != null) {
                 database.banSubnet(subnet.toString());
-                this.getServer().broadcastMessage(ChatColor.RED
-                        + subnet.toString()
-                        + Message.getMessage("has been banned",
-                        this.getConfiguration()));
+                this.getServer().broadcastMessage(ChatColor.RED + subnet.
+                        toString() + Message.getMessage("has been banned", this.
+                        getConfiguration()));
             } else {
-                sender.sendMessage(Message.getMessage("Invalid Subnet",
-                        this.getConfiguration()));
+                sender.sendMessage(Message.getMessage("Invalid Subnet", this.
+                        getConfiguration()));
             }
 
             return true;
         }
 
-        if (label.equals("esubnetunban")) {
-            if (args.length == 0 || !perm) {
+        if(label.equals("esubnetunban")) {
+            if(args.length == 0 || !perm) {
                 return true;
             }
             String[] sub = args[0].split("/");
             Subnet subnet = null;
-            if (sub.length == 2) {
+            if(sub.length == 2) {
                 try {
                     subnet = new Subnet(InetAddress.getByName(sub[0]),
-                            Integer.parseInt(sub[1]));
-                } catch (UnknownHostException ex) {
-                } catch (NumberFormatException ex) {
+                                        Integer.parseInt(sub[1]));
+                } catch(UnknownHostException ex) {
+                } catch(NumberFormatException ex) {
                     try {
                         subnet = new Subnet(InetAddress.getByName(sub[0]),
-                                InetAddress.getByName(sub[1]));
-                    } catch (UnknownHostException ex1) {
+                                            InetAddress.getByName(sub[1]));
+                    } catch(UnknownHostException ex1) {
                     }
                 }
             }
-            if (subnet != null) {
+            if(subnet != null) {
                 database.unbanSubnet(subnet.toString());
-                this.getServer().broadcastMessage(ChatColor.RED
-                        + args[0]
-                        + Message.getMessage("has been unbanned",
-                        this.getConfiguration()));
+                this.getServer().broadcastMessage(ChatColor.RED + args[0]
+                                                  + Message.getMessage(
+                        "has been unbanned", this.getConfiguration()));
                 return true;
             } else {
-                sender.sendMessage(Message.getMessage("Invalid Subnet",
-                        this.getConfiguration()));
+                sender.sendMessage(Message.getMessage("Invalid Subnet", this.
+                        getConfiguration()));
             }
         }
         return false;
     }
 
+    private void sendListToSender(CommandSender sender, String[] list) {
+        for(int i = 0; i < list.length; i += 4) {
+            String send = "";
+            for(int y = 0; y < 4; y++) {
+                if(i + y < list.length) {
+                    send += (list[i + y] + ", ");
+                } else {
+                    break;
+                }
+            }
+            sender.sendMessage(send);
+        }
+    }
+
     private void setupPermission() {
         Plugin permissionsPlugin = this.getServer().getPluginManager().
                 getPlugin("Permissions");
-        if (permissionsPlugin != null) {
+        if(permissionsPlugin != null) {
             permissionHandler = ((Permissions) permissionsPlugin).getHandler();
         }
     }

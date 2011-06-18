@@ -36,15 +36,15 @@ public class YamlDatasource implements Datasource {
 
     public YamlDatasource(JavaPlugin plugin) {
         banFile = new Configuration(new File(plugin.getDataFolder(),
-                "bans.yml"));
+                                             "bans.yml"));
         banFile.load();
-        if (banFile.getProperty(banPath) == null) {
+        if(banFile.getProperty(banPath) == null) {
             banFile.setProperty(banPath, new ArrayList<String>());
         }
-        if (banFile.getProperty(historyPath) == null) {
+        if(banFile.getProperty(historyPath) == null) {
             banFile.setProperty(historyPath, new HashMap<String, List<String>>());
         }
-        if (banFile.getProperty(subnetPath) == null) {
+        if(banFile.getProperty(subnetPath) == null) {
             banFile.setProperty(subnetPath, new ArrayList<String>());
         }
         banFile.save();
@@ -56,8 +56,8 @@ public class YamlDatasource implements Datasource {
         HashMap<String, List<String>> history =
                 (HashMap<String, List<String>>) banFile.getProperty(historyPath);
 
-        if (history.containsKey(nick)) {
-            if (!history.get(nick).contains(ip)) {
+        if(history.containsKey(nick)) {
+            if(!history.get(nick).contains(ip)) {
                 history.get(nick).add(ip);
             }
         } else {
@@ -72,7 +72,7 @@ public class YamlDatasource implements Datasource {
     public synchronized void banNick(String nick) {
         List<String> bans = (List<String>) banFile.getProperty(banPath);
 
-        if (!bans.contains(nick)) {
+        if(!bans.contains(nick)) {
             bans.add(nick);
         }
         banFile.save();
@@ -83,7 +83,7 @@ public class YamlDatasource implements Datasource {
     public synchronized void unbanNick(String nick) {
         List<String> bans = (List<String>) banFile.getProperty(banPath);
 
-        if (bans.contains(nick)) {
+        if(bans.contains(nick)) {
             bans.remove(nick);
         }
         banFile.save();
@@ -93,7 +93,7 @@ public class YamlDatasource implements Datasource {
     @SuppressWarnings("unchecked")
     public synchronized void banSubnet(String subnet) {
         List<String> subnets = (List<String>) banFile.getProperty(subnetPath);
-        if (!subnets.contains(subnet)) {
+        if(!subnets.contains(subnet)) {
             subnets.add(subnet);
         }
         banFile.save();
@@ -116,25 +116,25 @@ public class YamlDatasource implements Datasource {
         List<String> subnets = (List<String>) banFile.getProperty(subnetPath);
 
         Iterator<String> itl = subnets.iterator();
-        while (itl.hasNext()) {
+        while(itl.hasNext()) {
             try {
                 String[] sub = itl.next().split("/");
 
                 Subnet subnet = new Subnet(InetAddress.getByName(sub[0]),
-                        InetAddress.getByName(sub[1]));
+                                           InetAddress.getByName(sub[1]));
                 if(subnet.isIpInSubnet(InetAddress.getByName(ip))) {
                     return true;
                 }
-            } catch (UnknownHostException ex) {
+            } catch(UnknownHostException ex) {
             }
         }
 
         Iterator<Map.Entry<String, List<String>>> it =
                 history.entrySet().iterator();
-        while (it.hasNext()) {
+        while(it.hasNext()) {
             Map.Entry<String, List<String>> entry = it.next();
-            if (entry.getValue().contains(ip)) {
-                if (bans.contains(entry.getKey())) {
+            if(entry.getValue().contains(ip)) {
+                if(bans.contains(entry.getKey())) {
                     return true;
                 }
             }
@@ -146,10 +146,39 @@ public class YamlDatasource implements Datasource {
     @SuppressWarnings("unchecked")
     public synchronized boolean isNickBanned(String nick) {
         List<String> bans = (List<String>) banFile.getProperty(banPath);
-        if (bans.contains(nick)) {
+        if(bans.contains(nick)) {
             return true;
         }
         return false;
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public String[] getBannedNicks() {
+        List<String> bans = (List<String>) banFile.getProperty(banPath);
+        return bans.toArray(new String[0]);
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public String[] getBannedSubnets() {
+        List<String> subnets = (List<String>) banFile.getProperty(subnetPath);
+        return subnets.toArray(new String[0]);
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public String[] getPlayerIps(String nick) {
+        HashMap<String, List<String>> history = (HashMap<String, List<String>>) banFile.
+                getProperty(historyPath);
+
+        if(history.containsKey(nick)) {
+            List<String> list = history.get(nick);
+            return list.toArray(new String[0]);
+        } else {
+            return new String[0];
+        }
+
     }
 
     @Override

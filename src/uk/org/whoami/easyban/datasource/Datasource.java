@@ -27,6 +27,10 @@ public interface Datasource {
     public boolean isIpBanned(String ip);
     public boolean isNickBanned(String nick);
 
+    public String[] getBannedNicks();
+    public String[] getBannedSubnets();
+    public String[] getPlayerIps(String nick);
+
     public void close();
 
 }
