@@ -82,7 +82,7 @@ public class EasyBan extends JavaPlugin {
             perm = true;
         }
 
-        if(label.equals("ekick")) {
+        if(label.equalsIgnoreCase("ekick")) {
             if(args.length == 0 || !perm) {
                 return true;
             }
@@ -98,7 +98,7 @@ public class EasyBan extends JavaPlugin {
             return true;
         }
 
-        if(label.equals("eban")) {
+        if(label.equalsIgnoreCase("eban")) {
             if(args.length == 0 || !perm) {
                 return true;
             }
@@ -120,7 +120,7 @@ public class EasyBan extends JavaPlugin {
             return true;
         }
 
-        if(label.equals("elistbans")) {
+        if(label.equalsIgnoreCase("elistbans")) {
             if(!perm) {
                 return true;
             }
@@ -131,7 +131,7 @@ public class EasyBan extends JavaPlugin {
             return true;
         }
 
-        if(label.equals("elistsubnets")) {
+        if(label.equalsIgnoreCase("elistsubnets")) {
             if(!perm) {
                 return true;
             }
@@ -142,7 +142,7 @@ public class EasyBan extends JavaPlugin {
             return true;
         }
 
-        if(label.equals("elistips")) {
+        if(label.equalsIgnoreCase("elistips")) {
             if(args.length == 0 || !perm) {
                 return true;
             }
@@ -153,7 +153,7 @@ public class EasyBan extends JavaPlugin {
             return true;
         }
 
-        if(label.equals("eunban")) {
+        if(label.equalsIgnoreCase("eunban")) {
             if(args.length == 0 || !perm) {
                 return true;
             }
@@ -163,7 +163,7 @@ public class EasyBan extends JavaPlugin {
             return true;
         }
 
-        if(label.equals("esubnetban")) {
+        if(label.equalsIgnoreCase("esubnetban")) {
             if(args.length == 0 || !perm) {
                 return true;
             }
@@ -195,7 +195,7 @@ public class EasyBan extends JavaPlugin {
             return true;
         }
 
-        if(label.equals("esubnetunban")) {
+        if(label.equalsIgnoreCase("esubnetunban")) {
             if(args.length == 0 || !perm) {
                 return true;
             }

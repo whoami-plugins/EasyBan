@@ -1,6 +1,6 @@
 name: EasyBan
 main: uk.org.whoami.easyban.EasyBan
-version: 0.4
+version: 0.5
 commands:
     ekick:
         description: Kick player
