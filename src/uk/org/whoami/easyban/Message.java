@@ -57,6 +57,15 @@ public class Message {
         if(null == msgFile.getString("Ips from")) {
             msgFile.setProperty("Ips from", "Ips from");
         }
+        if(null == msgFile.getString(" is banned")) {
+            msgFile.setProperty(" is banned", " is banned");
+        }
+        if(null == msgFile.getString(" was banned by ")) {
+            msgFile.setProperty(" was banned by ", " was banned by ");
+        }
+        if(null == msgFile.getString("Reason: ")) {
+            msgFile.setProperty("Reason: ", "Reason: ");
+        }
 
         msgFile.save();
     }
