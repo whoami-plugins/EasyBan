@@ -142,8 +142,8 @@ public class EasyBan extends JavaPlugin {
 
             switch(info.length) {
                 case 0:
-                    sender.sendMessage(Message.getMessage("Unknown user", this.
-                            getConfiguration()));
+                    sender.sendMessage(args[0] + Message.getMessage(
+                            " is not banned", this.getConfiguration()));
                     break;
                 case 1:
                     sender.sendMessage(info[0] + Message.getMessage(" is banned",
