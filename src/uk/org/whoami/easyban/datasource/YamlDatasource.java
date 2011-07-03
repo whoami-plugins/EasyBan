@@ -70,7 +70,7 @@ public class YamlDatasource implements Datasource {
 
     @Override
     @SuppressWarnings("unchecked")
-    public synchronized void banNick(String nick, String admin) {
+    public synchronized void banNick(String nick, String admin, String reason, Long until) {
         HashMap<String, HashMap<String, String>> bans =
                 (HashMap<String, HashMap<String, String>>) banFile.getProperty(
                 banPath);
@@ -78,22 +78,12 @@ public class YamlDatasource implements Datasource {
         if(!bans.containsKey(nick)) {
             HashMap<String, String> tmp = new HashMap<String, String>();
             tmp.put("admin", admin);
-            bans.put(nick, tmp);
-            banFile.save();
-        }
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    public synchronized void banNick(String nick, String admin, String reason) {
-        HashMap<String, HashMap<String, String>> bans =
-                (HashMap<String, HashMap<String, String>>) banFile.getProperty(
-                banPath);
-
-        if(!bans.containsKey(nick)) {
-            HashMap<String, String> tmp = new HashMap<String, String>();
-            tmp.put("admin", admin);
-            tmp.put("reason", reason);
+            if(reason != null) {
+                tmp.put("reason", reason);
+            }
+            if(until != null) {
+                tmp.put("until", until.toString());
+            }
             bans.put(nick, tmp);
             banFile.save();
         }
@@ -108,21 +98,6 @@ public class YamlDatasource implements Datasource {
 
         if(bans.containsKey(nick)) {
             bans.remove(nick);
-            banFile.save();
-        }
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    public synchronized void banSubnet(Subnet subnet, String admin) {
-        HashMap<String, HashMap<String, String>> subnets =
-                (HashMap<String, HashMap<String, String>>) banFile.getProperty(
-                subnetPath);
-
-        if(!subnets.containsKey(subnet.toString())) {
-            HashMap<String, String> tmp = new HashMap<String, String>();
-            tmp.put("admin", admin);
-            subnets.put(subnet.toString(), tmp);
             banFile.save();
         }
     }
@@ -209,7 +184,7 @@ public class YamlDatasource implements Datasource {
 
     @Override
     @SuppressWarnings("unchecked")
-    public String[] getBannedNicks() {
+    public synchronized String[] getBannedNicks() {
         HashMap<String, HashMap<String, String>> bans =
                 (HashMap<String, HashMap<String, String>>) banFile.getProperty(
                 banPath);
@@ -218,7 +193,7 @@ public class YamlDatasource implements Datasource {
 
     @Override
     @SuppressWarnings("unchecked")
-    public String[] getBannedSubnets() {
+    public synchronized String[] getBannedSubnets() {
         HashMap<String, HashMap<String, String>> subnets =
                 (HashMap<String, HashMap<String, String>>) banFile.getProperty(
                 subnetPath);
@@ -227,7 +202,7 @@ public class YamlDatasource implements Datasource {
 
     @Override
     @SuppressWarnings("unchecked")
-    public String[] getPlayerIps(String nick) {
+    public synchronized String[] getPlayerIps(String nick) {
         HashMap<String, List<String>> history =
                 (HashMap<String, List<String>>) banFile.getProperty(historyPath);
 
@@ -242,59 +217,73 @@ public class YamlDatasource implements Datasource {
 
     @Override
     @SuppressWarnings("unchecked")
-    public String[] getBanInformation(String nick) {
+    public synchronized HashMap<String,String> getBanInformation(String nick) {
         HashMap<String, HashMap<String, String>> bans =
                 (HashMap<String, HashMap<String, String>>) banFile.getProperty(
                 banPath);
 
         if(bans.containsKey(nick)) {
+            HashMap<String,String> info = new HashMap<String,String>();
             HashMap<String, String> ban = bans.get(nick);
-            if(ban.containsKey("admin") && ban.containsKey("reason")) {
-                String[] ret = new String[3];
-                ret[0] = nick;
-                ret[1] = ban.get("admin");
-                ret[2] = ban.get("reason");
-                return ret;
-            } else if(ban.containsKey("admin")) {
-                String[] ret = new String[2];
-                ret[0] = nick;
-                ret[1] = ban.get("admin");
-
-                return ret;
-            } else {
-                return new String[]{nick};
+            info.put("nick", nick);
+            if(ban.containsKey("admin")) {
+                info.put("admin", ban.get("admin"));
             }
+            if(ban.containsKey("reason")) {
+                info.put("reason", ban.get("reason"));
+            }
+            if(ban.containsKey("until")) {
+                info.put("until", ban.get("until"));
+            }
+            return info;
         } else {
-            return new String[0];
+            return null;
         }
     }
 
     @Override
     @SuppressWarnings("unchecked")
-    public String[] getBanInformation(Subnet subnet) {
+    public synchronized HashMap<String,String> getBanInformation(Subnet subnet) {
         HashMap<String, HashMap<String, String>> subnets =
                 (HashMap<String, HashMap<String, String>>) banFile.getProperty(
                 subnetPath);
 
         if(subnets.containsKey(subnet.toString())) {
+            HashMap<String,String> info = new HashMap<String,String>();
             HashMap<String, String> ban = subnets.get(subnet.toString());
+
+            info.put("subnet", subnet.toString());
             if(ban.containsKey("admin")) {
-                String[] ret = new String[2];
-                ret[0] = subnet.toString();
-                ret[1] = ban.get("admin");
-                return ret;
-            } else if(ban.containsKey("admin") && ban.containsKey("reason")) {
-                String[] ret = new String[3];
-                ret[0] = subnet.toString();
-                ret[1] = ban.get("admin");
-                ret[2] = ban.get("reason");
-                return ret;
-            } else {
-                return new String[]{subnet.toString()};
+                info.put("admin", ban.get("admin"));
             }
+            if(ban.containsKey("reason")) {
+                info.put("reason", ban.get("reason"));
+            }
+            if(ban.containsKey("until")) {
+                info.put("until", ban.get("until"));
+            }
+            return info;
         } else {
-            return new String[0];
+            return null;
         }
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public synchronized HashMap<String,Long> getTempBans() {
+        HashMap<String,Long> tmpBans = new HashMap<String,Long>();
+        HashMap<String, HashMap<String, String>> bans =
+                (HashMap<String, HashMap<String, String>>) banFile.getProperty(
+                banPath);
+
+        Iterator<String> it = bans.keySet().iterator();
+        while(it.hasNext()) {
+            String nick = it.next();
+            if(bans.get(nick).containsKey("until")) {
+                tmpBans.put(nick, new Long(bans.get(nick).get("until")));
+            }
+        }
+        return tmpBans;
     }
 
     @Override

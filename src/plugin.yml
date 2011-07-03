@@ -1,19 +1,19 @@
 name: EasyBan
 main: uk.org.whoami.easyban.EasyBan
-version: 0.7
+version: 0.8
 commands:
     ekick:
         description: Kick player
         usage: /ekick playername
     eban:
         description: Ban player
-        usage: /eban playername
+        usage: /eban playername [reason] [time]
     eunban:
         description: Unban player
         usage: /eunban playername
     esubnetban:
         description: Ban a whole subnet
-        usage: /esubnetban a.b.c.d/w.x.y.z
+        usage: /esubnetban a.b.c.d/w.x.y.z [reason]
     esubnetunban:
         description: Unban a whole subnet
         usage: /esubnetunban a.b.c.d/w.x.y.z

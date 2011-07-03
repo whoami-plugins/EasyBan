@@ -15,20 +15,21 @@
  */
 package uk.org.whoami.easyban;
 
+import java.util.logging.Logger;
 import uk.org.whoami.easyban.datasource.Datasource;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerListener;
-import org.bukkit.plugin.java.JavaPlugin;
 
 public class EasyBanPlayerListener extends PlayerListener {
 
     private Datasource database;
-    private JavaPlugin parent;
+    private Message msg;
+    static final Logger log = Logger.getLogger("Minecraft");
 
-    public EasyBanPlayerListener(Datasource database, JavaPlugin plugin) {
+    public EasyBanPlayerListener(Datasource database) {
         this.database = database;
-        this.parent = plugin;
+        this.msg = Message.getInstance();
     }
 
     @Override
@@ -40,8 +41,8 @@ public class EasyBanPlayerListener extends PlayerListener {
         database.addIpToHistory(name, ip);
 
         if (database.isNickBanned(name) || database.isIpBanned(ip)) {
-            player.kickPlayer(Message.getMessage("You have been banned",
-                    parent.getConfiguration()));
+            player.kickPlayer(msg._("You are banned"));
+            log.info("Ban for " + player.getName() + " detected");
         }
     }
 }

@@ -15,61 +15,95 @@
  */
 package uk.org.whoami.easyban;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.Properties;
+import java.util.logging.Logger;
 import org.bukkit.util.config.Configuration;
 
 public class Message {
 
-    public Message() {
+    private static Message singleton = null;
+    private Configuration conf;
+    private static final Logger log = Logger.getLogger("Minecraft");
+
+    private Message(Configuration conf) {
+        this.conf = conf;
+        loadDefaults();
     }
 
-    public static String getMessage(String string, Configuration msgFile) {
-        return msgFile.getString(string);
+    private void loadDefaults() {
+        if(conf.getString(" has been kicked") == null) {
+            conf.setProperty(" has been kicked", " has been kicked");
+        }
+        if(conf.getString("You have been kicked") == null) {
+            conf.setProperty("You have been kicked", "You have been kicked");
+        }
+        if(conf.getString(" has been banned") == null) {
+            conf.setProperty(" has been banned", " has been banned");
+        }
+        if(conf.getString("You have been banned") == null) {
+            conf.setProperty("You have been banned", "You have been banned");
+        }
+        if(conf.getString(" has been unbanned") == null) {
+            conf.setProperty(" has been unbanned", " has been unbanned");
+        }
+        if(conf.getString("Invalid Subnet") == null) {
+            conf.setProperty("Invalid Subnet", "Invalid Subnet");
+        }
+        if(conf.getString("Banned players: ") == null) {
+            conf.setProperty("Banned players: ", "Banned players: ");
+        }
+        if(conf.getString("Banned subnets: ") == null) {
+            conf.setProperty("Banned subnets: ", "Banned subnets: ");
+        }
+        if(conf.getString("Ips from ") == null) {
+            conf.setProperty("Ips from ", "Ips from ");
+        }
+        if(conf.getString(" is not banned") == null) {
+            conf.setProperty(" is not banned", " is not banned");
+        }
+        if(conf.getString(" is banned") == null) {
+            conf.setProperty(" is banned", " is banned");
+        }
+        if(conf.getString("Reason: ") == null) {
+            conf.setProperty("Reason: ", "Reason: ");
+        }
+        if(conf.getString("Until: ") == null) {
+            conf.setProperty("Until: ", "Until: ");
+        }
+        if(conf.getString("Admin: ") == null) {
+            conf.setProperty("Admin: ", "Admin: ");
+        }
+        if(conf.getString("Wrong time format") == null) {
+            conf.setProperty("Wrong time format", "Wrong time format");
+        }
+        if(conf.getString("You are banned until: ") == null) {
+            conf.setProperty("You are banned until: ", "You are banned until: ");
+        }
+        if(conf.getString("You are banned") == null) {
+            conf.setProperty("You are banned", "You are banned");
+        }
+        conf.save();
     }
 
-    public static synchronized void loadDefaults(Configuration msgFile) {
-        if(null == msgFile.getString("EasyBan enabled")) {
-            msgFile.setProperty("EasyBan enabled", "EasyBan enabled");
-        }
-        if(null == msgFile.getString("has been kicked")) {
-            msgFile.setProperty("has been kicked", " has been kicked");
-        }
-        if(null == msgFile.getString("You have been kicked")) {
-            msgFile.setProperty("You have been kicked", "You have been kicked");
-        }
-        if(null == msgFile.getString("has been banned")) {
-            msgFile.setProperty("has been banned", " has been banned");
-        }
-        if(null == msgFile.getString("You have been banned")) {
-            msgFile.setProperty("You have been banned", "You have been banned");
-        }
-        if(null == msgFile.getString("has been unbanned")) {
-            msgFile.setProperty("has been unbanned", " has been unbanned");
-        }
-        if(null == msgFile.getString("Invalid Subnet")) {
-            msgFile.setProperty("Invalid Subnet", "Invalid Subnet");
-        }
-        if(null == msgFile.getString("Banned players")) {
-            msgFile.setProperty("Banned players", "Banned players");
-        }
-        if(null == msgFile.getString("Banned subnets")) {
-            msgFile.setProperty("Banned subnets", "Banned subnets");
-        }
-        if(null == msgFile.getString("Ips from")) {
-            msgFile.setProperty("Ips from", "Ips from");
-        }
-        if(null == msgFile.getString(" is not banned")) {
-            msgFile.setProperty(" is not banned", " is not banned");
-        }
-        if(null == msgFile.getString(" is banned")) {
-            msgFile.setProperty(" is banned", " is banned");
-        }
-        if(null == msgFile.getString(" was banned by ")) {
-            msgFile.setProperty(" was banned by ", " was banned by ");
-        }
-        if(null == msgFile.getString("Reason: ")) {
-            msgFile.setProperty("Reason: ", "Reason: ");
-        }
+    public String _(String message) {
+        return conf.getString(message, message);
+    }
 
-        msgFile.save();
+    public static Message getInstance(Configuration conf) {
+        if(singleton == null) {
+            singleton = new Message(conf);
+        }
+        return singleton;
+    }
+
+    public static Message getInstance() {
+        return singleton;
     }
 }
