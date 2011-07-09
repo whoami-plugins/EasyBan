@@ -16,11 +16,42 @@
 package uk.org.whoami.easyban.util;
 
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 
 public class Subnet {
 
     short[] subnet;
     short[] mask;
+
+    public Subnet(String subnet) throws IllegalArgumentException {
+        if(!subnet.contains("/")) {
+            throw new IllegalArgumentException("Invalid Subnet");
+        }
+        String[] sub = subnet.split("/");
+        if(sub.length != 2) {
+            throw new IllegalArgumentException("Invalid Subnet");
+        }
+
+        try {
+            this.subnet = Subnet.inetAddressToArray(InetAddress.getByName(sub[0]));
+        } catch(UnknownHostException ex) {
+            throw new IllegalArgumentException("Invalid Networkprefix");
+        }
+
+        if(Subnet.isParseableInteger(sub[1])) {
+            int cidr = Integer.parseInt(sub[1]);
+            if(cidr < 0 || cidr > 32) {
+                throw new IllegalArgumentException("Invalid CIDR-Mask");
+            }
+            this.mask = Subnet.cidrToArray(cidr);
+        } else {
+            try {
+                this.mask = Subnet.inetAddressToArray(InetAddress.getByName(sub[1]));
+            } catch(UnknownHostException ex) {
+                throw new IllegalArgumentException("Invalid Subnetmask");
+            }
+        }
+    }
 
     public Subnet(short[] subnet, short[] mask) {
         if (subnet.length > mask.length) {
@@ -28,18 +59,6 @@ public class Subnet {
         }
         this.subnet = subnet;
         this.mask = mask;
-    }
-
-    public Subnet(short[] subnet, int bits) {
-        this(subnet, Subnet.cidrToArray(bits));
-    }
-
-    public Subnet(InetAddress subnet, InetAddress mask) {
-        this(Subnet.inetAddressToArray(subnet), Subnet.inetAddressToArray(mask));
-    }
-
-    public Subnet(InetAddress subnet, int cidr) {
-        this(Subnet.inetAddressToArray(subnet), Subnet.cidrToArray(cidr));
     }
 
     public boolean isIpInSubnet(short[] ip) {
@@ -135,5 +154,14 @@ public class Subnet {
             ret[i] = (short) (0x000000FF & ((int) addr[i]));
         }
         return ret;
+    }
+
+    public static boolean isParseableInteger(String s) {
+        try {
+            Integer.parseInt(s);
+        } catch(NumberFormatException ex) {
+            return false;
+        }
+        return true;
     }
 }

@@ -19,6 +19,7 @@ import java.util.HashMap;
 import uk.org.whoami.easyban.util.Subnet;
 
 public interface Datasource {
+
     public void addIpToHistory(String nick,String ip);
 
     public void banNick(String nick,String admin,String reason, Long until);
@@ -27,16 +28,26 @@ public interface Datasource {
     public void banSubnet(Subnet subnet,String admin,String reason);
     public void unbanSubnet(Subnet subnet);
 
+    public void banCountry(String code);
+    public void unbanCountry(String code);
+
+    public void whitelist(String nick);
+    public void unWhitelist(String nick);
+
     public boolean isIpBanned(String ip);
     public boolean isNickBanned(String nick);
+    public boolean isCountryBanned(String code);
+    public boolean isNickWhitelisted(String nick);
 
+    public String[] getHistory(String nick);
     public String[] getBannedNicks();
     public String[] getBannedSubnets();
+    public String[] getBannedCountries();
+    public String[] getWhitelistedNicks();
+
     public HashMap<String,Long> getTempBans();
-    public String[] getPlayerIps(String nick);
     public HashMap<String,String> getBanInformation(String nick);
     public HashMap<String,String> getBanInformation(Subnet subnet);
 
     public void close();
-
 }

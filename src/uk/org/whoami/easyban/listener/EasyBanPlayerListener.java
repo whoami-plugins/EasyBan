@@ -13,19 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.org.whoami.easyban;
+package uk.org.whoami.easyban.listener;
 
-import java.util.logging.Logger;
 import uk.org.whoami.easyban.datasource.Datasource;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerListener;
+import uk.org.whoami.easyban.ConsoleLogger;
+import uk.org.whoami.easyban.Message;
 
 public class EasyBanPlayerListener extends PlayerListener {
 
     private Datasource database;
     private Message msg;
-    static final Logger log = Logger.getLogger("Minecraft");
 
     public EasyBanPlayerListener(Datasource database) {
         this.database = database;
@@ -34,15 +34,22 @@ public class EasyBanPlayerListener extends PlayerListener {
 
     @Override
     public void onPlayerJoin(PlayerJoinEvent event) {
+        if(event.getPlayer() == null) {
+            return;
+        }
         Player player = event.getPlayer();
         String name = player.getName();
         String ip = player.getAddress().getAddress().getHostAddress();
 
         database.addIpToHistory(name, ip);
 
+        if(database.isNickWhitelisted(name)) {
+            return;
+        }
+
         if (database.isNickBanned(name) || database.isIpBanned(ip)) {
             player.kickPlayer(msg._("You are banned"));
-            log.info("Ban for " + player.getName() + " detected");
+            ConsoleLogger.info("Ban for " + name + " detected");
         }
     }
 }

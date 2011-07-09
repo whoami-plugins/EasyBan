@@ -14,19 +14,17 @@
  * limitations under the License.
  */
 
-package uk.org.whoami.easyban;
+package uk.org.whoami.easyban.tasks;
 
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import uk.org.whoami.easyban.ConsoleLogger;
 import uk.org.whoami.easyban.datasource.Datasource;
 
 public class UnbanTask implements Runnable {
 
     private Datasource data;
-    private static final Logger log = Logger.getLogger("Minecraft");
 
     public UnbanTask(Datasource data) {
         this.data = data;
@@ -41,7 +39,7 @@ public class UnbanTask implements Runnable {
             String name = it.next();
             if(cal.getTimeInMillis() > tmpBans.get(name)) {
                 data.unbanNick(name);
-                log.info("[EasyBan] Temporary for "+ name +" ban has been removed");
+                ConsoleLogger.info("Temporary for "+ name +" ban has been removed");
             }
         }
     }

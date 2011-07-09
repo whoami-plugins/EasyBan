@@ -16,89 +16,88 @@
 package uk.org.whoami.easyban;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.Properties;
-import java.util.logging.Logger;
+import java.util.HashMap;
 import org.bukkit.util.config.Configuration;
 
-public class Message {
+public class Message extends Configuration {
 
     private static Message singleton = null;
-    private Configuration conf;
-    private static final Logger log = Logger.getLogger("Minecraft");
+    private final HashMap<String, String> map = new HashMap<String, String>();
 
-    private Message(Configuration conf) {
-        this.conf = conf;
+    private Message(File folder) {
+        super(new File(folder, "messages.yml"));
         loadDefaults();
+        getMessages();
     }
 
     private void loadDefaults() {
-        if(conf.getString(" has been kicked") == null) {
-            conf.setProperty(" has been kicked", " has been kicked");
-        }
-        if(conf.getString("You have been kicked") == null) {
-            conf.setProperty("You have been kicked", "You have been kicked");
-        }
-        if(conf.getString(" has been banned") == null) {
-            conf.setProperty(" has been banned", " has been banned");
-        }
-        if(conf.getString("You have been banned") == null) {
-            conf.setProperty("You have been banned", "You have been banned");
-        }
-        if(conf.getString(" has been unbanned") == null) {
-            conf.setProperty(" has been unbanned", " has been unbanned");
-        }
-        if(conf.getString("Invalid Subnet") == null) {
-            conf.setProperty("Invalid Subnet", "Invalid Subnet");
-        }
-        if(conf.getString("Banned players: ") == null) {
-            conf.setProperty("Banned players: ", "Banned players: ");
-        }
-        if(conf.getString("Banned subnets: ") == null) {
-            conf.setProperty("Banned subnets: ", "Banned subnets: ");
-        }
-        if(conf.getString("Ips from ") == null) {
-            conf.setProperty("Ips from ", "Ips from ");
-        }
-        if(conf.getString(" is not banned") == null) {
-            conf.setProperty(" is not banned", " is not banned");
-        }
-        if(conf.getString(" is banned") == null) {
-            conf.setProperty(" is banned", " is banned");
-        }
-        if(conf.getString("Reason: ") == null) {
-            conf.setProperty("Reason: ", "Reason: ");
-        }
-        if(conf.getString("Until: ") == null) {
-            conf.setProperty("Until: ", "Until: ");
-        }
-        if(conf.getString("Admin: ") == null) {
-            conf.setProperty("Admin: ", "Admin: ");
-        }
-        if(conf.getString("Wrong time format") == null) {
-            conf.setProperty("Wrong time format", "Wrong time format");
-        }
-        if(conf.getString("You are banned until: ") == null) {
-            conf.setProperty("You are banned until: ", "You are banned until: ");
-        }
-        if(conf.getString("You are banned") == null) {
-            conf.setProperty("You are banned", "You are banned");
-        }
-        conf.save();
+        map.put(" has been kicked", " has been kicked");
+        map.put("You have been kicked", "You have been kicked");
+        map.put(" has been banned", " has been banned");
+        map.put("You have been banned", "You have been banned");
+        map.put(" has been unbanned", " has been unbanned");
+        map.put("Invalid Subnet", "Invalid Subnet");
+        map.put("Banned players: ", "Banned players: ");
+        map.put("Banned subnets: ", "Banned subnets: ");
+        map.put("Ips from ", "Ips from ");
+        map.put(" is not banned", " is not banned");
+        map.put(" is banned", " is banned");
+        map.put("Reason: ", "Reason: ");
+        map.put("Until: ", "Until: ");
+        map.put("Admin: ", "Admin: ");
+        map.put("Wrong time format", "Wrong time format");
+        map.put("You are banned until: ", "You are banned until: ");
+        map.put("You are banned", "You are banned");
+        map.put("Your country has been banned", "Your country has been banned");
+        map.put("Temporary bans: ", "Temporary bans: ");
+        map.put("A country has been banned: ", "A country has been banned: ");
+        map.put("A country has been unbanned: ", "A country has been unbanned: ");
+        map.put("Banned countries: ", "Banned countries: ");
+        map.put(" has been whitelisted", " has been whitelisted");
+        map.put(" has been removed from the whitelist",
+                " has been removed from the whitelist");
+        map.put("Whitelist: ", "Whitelist: ");
     }
 
     public String _(String message) {
-        return conf.getString(message, message);
+        String ret = map.get(message);
+        if(ret == null) {
+            return message;
+        }
+        return ret;
     }
 
-    public static Message getInstance(Configuration conf) {
+    public void updateMessages(Configuration conf) {
+        for(String key : conf.getKeys()) {
+            if(key.equals("database") || key.equals("maxmind") || key.equals("maxmindv6")) {
+                continue;
+            }
+
+            if(map.containsKey(key)) {
+                map.put(key, conf.getString(key));
+                this.setProperty(key, map.get(key));
+            }
+            conf.removeProperty(key);
+            conf.save();
+        }
+        this.save();
+    }
+
+    private void getMessages() {
+        this.load();
+        for(String key : map.keySet()) {
+            if(this.getString(key) == null) {
+                this.setProperty(key, map.get(key));
+            } else {
+                map.put(key, this.getString(key));
+            }
+        }
+        this.save();
+    }
+
+    public static Message getInstance(File folder) {
         if(singleton == null) {
-            singleton = new Message(conf);
+            singleton = new Message(folder);
         }
         return singleton;
     }

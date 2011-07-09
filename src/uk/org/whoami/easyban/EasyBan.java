@@ -15,17 +15,18 @@
  */
 package uk.org.whoami.easyban;
 
-import java.net.UnknownHostException;
+import java.io.IOException;
+import uk.org.whoami.easyban.listener.EasyBanPlayerListener;
+import uk.org.whoami.easyban.tasks.UnbanTask;
 import uk.org.whoami.easyban.datasource.Datasource;
 import uk.org.whoami.easyban.datasource.YamlDatasource;
 import com.nijiko.permissions.PermissionHandler;
 import com.nijikokun.bukkit.Permissions.Permissions;
-import java.net.InetAddress;
+import java.io.File;
 import java.text.DateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.logging.Logger;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -33,14 +34,15 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
+import uk.org.whoami.easyban.listener.EasyBanCountryListener;
 import uk.org.whoami.easyban.util.Subnet;
 
 public class EasyBan extends JavaPlugin {
 
     private Datasource database;
     private PermissionHandler permissionHandler;
-    private Message msg;
-    private static final Logger log = Logger.getLogger("Minecraft");
+    private final File data = new File(this.getDataFolder(), "plugins/EasyBan/");
+    private Message m;
 
     private void initConfig() {
         if(this.getConfiguration().getProperty("database") == null) {
@@ -59,19 +61,39 @@ public class EasyBan extends JavaPlugin {
     public void onEnable() {
         initConfig();
         setupPermission();
-        msg = Message.getInstance(this.getConfiguration());
+        if(!data.exists()) {
+            data.mkdirs();
+        }
+        m = Message.getInstance(data);
+        m.updateMessages(this.getConfiguration());
+
         if(this.getConfiguration().getProperty("database").equals("yaml")) {
             database = new YamlDatasource(this);
         } else {
             this.getServer().getPluginManager().disablePlugin(this);
         }
+
         this.getServer().getPluginManager().registerEvent(Event.Type.PLAYER_JOIN,
                 new EasyBanPlayerListener(database),
-                Event.Priority.Low, this);
+                Event.Priority.Highest, this);
+
+        String geo = this.getConfiguration().getString("maxmind");
+        String geov6 = this.getConfiguration().getString("maxmindv6");
+        if(geo != null || geov6 != null) {
+            try {
+                this.getServer().getPluginManager().registerEvent(
+                        Event.Type.PLAYER_JOIN,
+                        new EasyBanCountryListener(database, geo, geov6),
+                        Event.Priority.Low, this);
+            } catch(IOException ex) {
+                ConsoleLogger.info("Can't load Maxmind GeoIP database");
+            }
+        }
+
         this.getServer().getScheduler().scheduleAsyncRepeatingTask(this,
                 new UnbanTask(database), 60L, 1200L);
-        log.info("[EasyBan] EasyBan " + this.getDescription().getVersion()
-                 + " enabled");
+        ConsoleLogger.info("EasyBan enabled; Version: " + this.getDescription().
+                getVersion());
     }
 
     @Override
@@ -98,11 +120,21 @@ public class EasyBan extends JavaPlugin {
             Player player = this.getServer().getPlayer(args[0]);
             if(player != null) {
                 this.getServer().broadcastMessage(ChatColor.RED + player.
-                        getDisplayName() + msg._(" has been kicked"));
-                player.kickPlayer(msg._("You have been kicked"));
-                log.info("[EasyBan] " + player.getName()
-                         + " has been kicked by " + admin);
+                        getDisplayName() + m._(" has been kicked"));
+                player.kickPlayer(m._("You have been kicked"));
+                ConsoleLogger.info(player.getName() + " has been kicked by "
+                                   + admin);
             }
+            return true;
+        }
+
+        if(label.equalsIgnoreCase("ehistory")) {
+            if(args.length == 0 || !perm) {
+                return true;
+            }
+
+            sender.sendMessage(m._("Ips from " + args[0]));
+            this.sendListToSender(sender, database.getHistory(args[0]));
             return true;
         }
 
@@ -119,6 +151,10 @@ public class EasyBan extends JavaPlugin {
 
             if(args.length == 1) {
                 database.banNick(playerNick, admin, null, null);
+                if(player != null) {
+                    player.kickPlayer(m._("You have been banned"));
+                }
+                ConsoleLogger.info(playerNick + " has been banned by " + admin);
             } else {
                 int to = args.length - 1;
                 Integer min = null;
@@ -139,10 +175,10 @@ public class EasyBan extends JavaPlugin {
                 if(min == null) {
                     database.banNick(playerNick, admin, reason, null);
                     if(player != null) {
-                        player.kickPlayer(msg._("You have been banned"));
+                        player.kickPlayer(m._("You have been banned"));
                     }
-                    log.info("[EasyBan] " + playerNick + " has been banned by "
-                             + admin);
+                    ConsoleLogger.info(playerNick + " has been banned by "
+                                       + admin);
                 } else {
                     Calendar cal = Calendar.getInstance();
                     cal.add(Calendar.MINUTE, min);
@@ -152,11 +188,22 @@ public class EasyBan extends JavaPlugin {
                         player.kickPlayer("You are banned until: " + DateFormat.
                                 getDateTimeInstance().format(cal.getTime()));
                     }
-                    log.info("[EasyBan] Temporary ban for " + playerNick);
+                    ConsoleLogger.info("Temporary ban for " + playerNick);
                 }
-                this.getServer().broadcastMessage(ChatColor.RED + playerNick
-                                                  + msg._(" has been banned"));
             }
+            this.getServer().broadcastMessage(ChatColor.RED + playerNick
+                                              + m._(" has been banned"));
+            return true;
+        }
+
+        if(label.equalsIgnoreCase("eunban")) {
+            if(args.length == 0 || !perm) {
+                return true;
+            }
+            database.unbanNick(args[0]);
+            this.getServer().broadcastMessage(args[0]
+                                              + m._(" has been unbanned"));
+            ConsoleLogger.info(args[0] + " has been unbanned");
             return true;
         }
 
@@ -167,20 +214,20 @@ public class EasyBan extends JavaPlugin {
 
             HashMap<String, String> info = database.getBanInformation(args[0]);
             if(info == null) {
-                sender.sendMessage(args[0] + msg._(" is not banned"));
+                sender.sendMessage(args[0] + m._(" is not banned"));
                 return true;
             }
 
-            sender.sendMessage(args[0] + msg._(" is banned"));
+            sender.sendMessage(args[0] + m._(" is banned"));
             if(info.containsKey("admin")) {
-                sender.sendMessage(msg._("Admin: ") + info.get("admin"));
+                sender.sendMessage(m._("Admin: ") + info.get("admin"));
             }
             if(info.containsKey("reason")) {
-                sender.sendMessage(msg._("Reason: ") + info.get("reason"));
+                sender.sendMessage(m._("Reason: ") + info.get("reason"));
             }
             if(info.containsKey("until")) {
                 Date until = new Date(new Long(info.get("until")));
-                sender.sendMessage(msg._("Until: ") + DateFormat.
+                sender.sendMessage(m._("Until: ") + DateFormat.
                         getDateTimeInstance().format(until));
             }
             return true;
@@ -191,61 +238,34 @@ public class EasyBan extends JavaPlugin {
                 return true;
             }
 
-            sender.sendMessage(msg._("Banned players: "));
+            sender.sendMessage(m._("Banned players: "));
             this.sendListToSender(sender, database.getBannedNicks());
             return true;
         }
 
-        if(label.equalsIgnoreCase("elistsubnets")) {
+        if(label.equalsIgnoreCase("elisttmpbans")) {
             if(!perm) {
                 return true;
             }
-
-            sender.sendMessage(msg._("Banned subnets: "));
-            this.sendListToSender(sender, database.getBannedSubnets());
+            sender.sendMessage(m._("Temporary bans: "));
+            for(String key : database.getTempBans().keySet()) {
+                sender.sendMessage(key + " : "
+                                   + DateFormat.getDateTimeInstance().format(new Date(database.
+                        getTempBans().get(key))));
+            }
             return true;
         }
 
-        if(label.equalsIgnoreCase("elistips")) {
+        if(label.equalsIgnoreCase("ebansubnet")) {
             if(args.length == 0 || !perm) {
                 return true;
             }
-
-            sender.sendMessage(msg._("Ips from " + args[0]));
-            this.sendListToSender(sender, database.getPlayerIps(args[0]));
-            return true;
-        }
-
-        if(label.equalsIgnoreCase("eunban")) {
-            if(args.length == 0 || !perm) {
-                return true;
-            }
-            database.unbanNick(args[0]);
-            this.getServer().broadcastMessage(args[0] + msg._(
-                    " has been unbanned"));
-            log.info("[EasyBan] " + args[0] + " has been unbanned");
-            return true;
-        }
-
-        if(label.equalsIgnoreCase("esubnetban")) {
-            if(args.length == 0 || !perm) {
-                return true;
-            }
-            String[] sub = args[0].split("/");
             Subnet subnet = null;
-            if(sub.length == 2) {
-                try {
-                    subnet = new Subnet(InetAddress.getByName(sub[0]), Integer.
-                            parseInt(sub[1]));
-                } catch(UnknownHostException ex) {
-                } catch(NumberFormatException ex) {
-                    try {
-                        subnet = new Subnet(InetAddress.getByName(sub[0]),
-                                InetAddress.getByName(sub[1]));
-                    } catch(UnknownHostException ex1) {
-                    }
-                }
+            try {
+                subnet = new Subnet(args[0]);
+            } catch(IllegalArgumentException ex) {
             }
+
             if(subnet != null) {
                 if(args.length == 1) {
                     database.banSubnet(subnet, admin, null);
@@ -257,45 +277,107 @@ public class EasyBan extends JavaPlugin {
                     database.banSubnet(subnet, admin, reason);
                 }
                 this.getServer().broadcastMessage(ChatColor.RED + subnet.
-                        toString() + msg._(" has been banned"));
-                log.info("[EasyBan] " + subnet.toString()
-                         + " has been banned by " + admin);
+                        toString() + m._(" has been banned"));
+                ConsoleLogger.info(subnet.toString() + " has been banned by "
+                                   + admin);
             } else {
-                sender.sendMessage(msg._("Invalid Subnet"));
+                sender.sendMessage(m._("Invalid Subnet"));
             }
 
             return true;
         }
 
-        if(label.equalsIgnoreCase("esubnetunban")) {
+        if(label.equalsIgnoreCase("eunbansubnet")) {
             if(args.length == 0 || !perm) {
                 return true;
             }
-            String[] sub = args[0].split("/");
             Subnet subnet = null;
-            if(sub.length == 2) {
-                try {
-                    subnet = new Subnet(InetAddress.getByName(sub[0]),
-                            Integer.parseInt(sub[1]));
-                } catch(UnknownHostException ex) {
-                } catch(NumberFormatException ex) {
-                    try {
-                        subnet = new Subnet(InetAddress.getByName(sub[0]),
-                                InetAddress.getByName(sub[1]));
-                    } catch(UnknownHostException ex1) {
-                    }
-                }
+            try {
+                subnet = new Subnet(args[0]);
+            } catch(IllegalArgumentException ex) {
             }
+
             if(subnet != null) {
                 database.unbanSubnet(subnet);
-                this.getServer().broadcastMessage(ChatColor.RED + args[0] + msg.
-                        _(" has been unbanned"));
-                log.info("[EasyBan] " + args[0] + " has been unbanned by "
-                         + admin);
+                this.getServer().broadcastMessage(ChatColor.RED + args[0] + m._(
+                        " has been unbanned"));
+                ConsoleLogger.info(args[0] + " has been unbanned by " + admin);
                 return true;
             } else {
-                sender.sendMessage(msg._("Invalid Subnet"));
+                sender.sendMessage(m._("Invalid Subnet"));
             }
+        }
+
+        if(label.equalsIgnoreCase("elistsubnets")) {
+            if(!perm) {
+                return true;
+            }
+
+            sender.sendMessage(m._("Banned subnets: "));
+            this.sendListToSender(sender, database.getBannedSubnets());
+            return true;
+        }
+
+        if(label.equalsIgnoreCase("ebancountry")) {
+            if(args.length == 0 || !perm) {
+                return true;
+            }
+            database.banCountry(args[0]);
+            this.getServer().broadcastMessage(m._("A country has been banned: ")
+                                              + args[0]);
+            ConsoleLogger.info(admin + " banned the country " + args[0]);
+            return true;
+        }
+
+        if(label.equalsIgnoreCase("eunbancountry")) {
+            if(args.length == 0 || !perm) {
+                return true;
+            }
+            database.unbanCountry(args[0]);
+            this.getServer().broadcastMessage(m._(
+                    "A country has been unbanned: ") + args[0]);
+            ConsoleLogger.info(admin + " unbanned the country " + args[0]);
+            return true;
+        }
+
+        if(label.equalsIgnoreCase("elistcountries")) {
+            if(!perm) {
+                return true;
+            }
+            sender.sendMessage(m._("Banned countries: "));
+            this.sendListToSender(sender, database.getBannedCountries());
+            return true;
+        }
+
+        if(label.equalsIgnoreCase("ewhitelist")) {
+            if(args.length == 0 || !perm) {
+                return true;
+            }
+            database.whitelist(args[0]);
+            this.getServer().broadcastMessage(args[0] + m._(
+                    " has been whitelisted"));
+            ConsoleLogger.info(admin + " whitelisted " + args[0]);
+            return true;
+        }
+
+        if(label.equalsIgnoreCase("eunwhitelist")) {
+            if(args.length == 0 || !perm) {
+                return true;
+            }
+            database.unWhitelist(args[0]);
+            this.getServer().broadcastMessage(args[0] + m._(
+                    " has been removed from the whitelist"));
+            ConsoleLogger.info(admin + " unwhitelisted " + args[0]);
+            return true;
+        }
+
+        if(label.equalsIgnoreCase("elistwhite")) {
+            if(!perm) {
+                return true;
+            }
+            sender.sendMessage(m._("Whitelist: "));
+            this.sendListToSender(sender, database.getWhitelistedNicks());
+            return true;
         }
         return false;
     }
