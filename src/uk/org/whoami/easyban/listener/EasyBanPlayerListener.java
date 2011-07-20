@@ -43,10 +43,6 @@ public class EasyBanPlayerListener extends PlayerListener {
 
         database.addIpToHistory(name, ip);
 
-        if(database.isNickWhitelisted(name)) {
-            return;
-        }
-
         if (database.isNickBanned(name) || database.isIpBanned(ip)) {
             player.kickPlayer(msg._("You are banned"));
             ConsoleLogger.info("Ban for " + name + " detected");
