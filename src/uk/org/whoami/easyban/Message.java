@@ -57,6 +57,7 @@ public class Message extends Configuration {
         map.put(" has been removed from the whitelist",
                 " has been removed from the whitelist");
         map.put("Whitelist: ", "Whitelist: ");
+        map.put("Alternative nicks of ", "Alternative nicks of ");
     }
 
     public String _(String message) {

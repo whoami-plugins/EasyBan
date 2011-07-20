@@ -44,6 +44,7 @@ public interface Datasource {
     public String[] getBannedSubnets();
     public String[] getBannedCountries();
     public String[] getWhitelistedNicks();
+    public String[] getNicks(String ip);
 
     public HashMap<String,Long> getTempBans();
     public HashMap<String,String> getBanInformation(String nick);

@@ -24,7 +24,9 @@ import com.nijiko.permissions.PermissionHandler;
 import com.nijikokun.bukkit.Permissions.Permissions;
 import java.io.File;
 import java.text.DateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import org.bukkit.ChatColor;
@@ -133,8 +135,23 @@ public class EasyBan extends JavaPlugin {
                 return true;
             }
 
-            sender.sendMessage(m._("Ips from " + args[0]));
+            sender.sendMessage(m._("Ips from ") + args[0]);
             this.sendListToSender(sender, database.getHistory(args[0]));
+            return true;
+        }
+
+        if(label.equalsIgnoreCase("ealternative")) {
+            if(args.length == 0 || !perm) {
+                return true;
+            }
+
+            ArrayList<String> nicks = new ArrayList<String>();
+
+            for(String ip:database.getHistory(args[0])) {
+                Collections.addAll(nicks, database.getNicks(ip));
+            }
+            sender.sendMessage(m._("Alternative nicks of ") + args[0]);
+            this.sendListToSender(sender, nicks.toArray(new String[0]));
             return true;
         }
 

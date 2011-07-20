@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map.Entry;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.util.config.Configuration;
 import uk.org.whoami.easyban.util.Subnet;
@@ -218,6 +219,18 @@ public class YamlDatasource extends Configuration implements Datasource {
     @Override
     public synchronized String[] getWhitelistedNicks() {
         return whitelist.toArray(new String[0]);
+    }
+
+    @Override
+    public String[] getNicks(String ip) {
+        ArrayList<String> nicks = new ArrayList<String>();
+
+        for(Entry<String,List<String>> entry:history.entrySet()) {
+            if(entry.getValue().contains(ip)) {
+                nicks.add(entry.getKey());
+            }
+        }
+        return nicks.toArray(new String[0]);
     }
 
     @Override

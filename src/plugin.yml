@@ -1,6 +1,6 @@
 name: EasyBan
 main: uk.org.whoami.easyban.EasyBan
-version: 0.9
+version: 1.0
 commands:
     ekick:
         description: Kick player
@@ -8,6 +8,9 @@ commands:
     ehistory:
         description: List all ips of a player
         usage: /elistips playername
+    ealternative:
+        description: Get alternative nicknames of a player
+        usage: /ealternative playername
     eban:
         description: Ban player
         usage: /eban playername [reason] [time]
