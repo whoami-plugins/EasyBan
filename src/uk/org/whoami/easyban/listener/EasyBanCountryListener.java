@@ -15,33 +15,23 @@
  */
 package uk.org.whoami.easyban.listener;
 
-import com.maxmind.geoip.LookupService;
-import java.io.IOException;
-import java.net.Inet6Address;
 import java.net.InetAddress;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerListener;
 import uk.org.whoami.easyban.ConsoleLogger;
 import uk.org.whoami.easyban.Message;
 import uk.org.whoami.easyban.datasource.Datasource;
+import uk.org.whoami.geoip.GeoIPLookup;
 
 public class EasyBanCountryListener extends PlayerListener {
 
-    private LookupService geo = null;
-    private LookupService geov6 = null;
     private Datasource database;
+    private GeoIPLookup geo;
     private final Message m = Message.getInstance();
 
-    public EasyBanCountryListener(Datasource data, String geo, String geov6)
-            throws IOException {
+    public EasyBanCountryListener(Datasource data, GeoIPLookup geo) {
         this.database = data;
-        if(geo != null) {
-            this.geo = new LookupService(geo, LookupService.GEOIP_MEMORY_CACHE);
-        }
-        if(geov6 != null) {
-            this.geov6 = new LookupService(geov6,
-                    LookupService.GEOIP_MEMORY_CACHE);
-        }
+        this.geo = geo;
     }
 
     @Override
@@ -55,14 +45,7 @@ public class EasyBanCountryListener extends PlayerListener {
         }
 
         InetAddress ip = event.getPlayer().getAddress().getAddress();
-        String code;
-        if(ip instanceof Inet6Address && geov6 != null) {
-            code = geov6.getCountryV6(ip).getCode();
-        } else if(geo != null) {
-            code = geo.getCountry(ip).getCode();
-        } else {
-            return;
-        }
+        String code = geo.getCountry(ip).getCode();
 
         if(database.isCountryBanned(code)) {
             ConsoleLogger.info("Player " + event.getPlayer().getName()

@@ -40,6 +40,7 @@ public class YamlDatasource extends Configuration implements Datasource {
     private ArrayList<String> countries;
     private ArrayList<String> whitelist;
 
+    @SuppressWarnings("unchecked")
     public YamlDatasource(JavaPlugin plugin) {
         super(new File(plugin.getDataFolder(), "bans.yml"));
         load();

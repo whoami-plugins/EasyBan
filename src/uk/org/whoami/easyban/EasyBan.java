@@ -15,7 +15,6 @@
  */
 package uk.org.whoami.easyban;
 
-import java.io.IOException;
 import uk.org.whoami.easyban.listener.EasyBanPlayerListener;
 import uk.org.whoami.easyban.tasks.UnbanTask;
 import uk.org.whoami.easyban.datasource.Datasource;
@@ -38,6 +37,8 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import uk.org.whoami.easyban.listener.EasyBanCountryListener;
 import uk.org.whoami.easyban.util.Subnet;
+import uk.org.whoami.geoip.GeoIPLookup;
+import uk.org.whoami.geoip.GeoIPTools;
 
 public class EasyBan extends JavaPlugin {
 
@@ -79,19 +80,13 @@ public class EasyBan extends JavaPlugin {
                 new EasyBanPlayerListener(database),
                 Event.Priority.Highest, this);
 
-        String geo = this.getConfiguration().getString("maxmind");
-        String geov6 = this.getConfiguration().getString("maxmindv6");
-        if(geo != null || geov6 != null) {
-            try {
-                this.getServer().getPluginManager().registerEvent(
-                        Event.Type.PLAYER_JOIN,
-                        new EasyBanCountryListener(database, geo, geov6),
-                        Event.Priority.Low, this);
-            } catch(IOException ex) {
-                ConsoleLogger.info("Can't load Maxmind GeoIP database");
-            }
+        GeoIPLookup geo = getGeoIPLookup();
+        if(geo != null) {
+            this.getServer().getPluginManager().registerEvent(
+                    Event.Type.PLAYER_JOIN,
+                    new EasyBanCountryListener(database, geo),
+                    Event.Priority.Low, this);
         }
-
         this.getServer().getScheduler().scheduleAsyncRepeatingTask(this,
                 new UnbanTask(database), 60L, 1200L);
         ConsoleLogger.info("EasyBan enabled; Version: " + this.getDescription().
@@ -147,7 +142,7 @@ public class EasyBan extends JavaPlugin {
 
             ArrayList<String> nicks = new ArrayList<String>();
 
-            for(String ip:database.getHistory(args[0])) {
+            for(String ip : database.getHistory(args[0])) {
                 Collections.addAll(nicks, database.getNicks(ip));
             }
             sender.sendMessage(m._("Alternative nicks of ") + args[0]);
@@ -418,6 +413,16 @@ public class EasyBan extends JavaPlugin {
                 getPlugin("Permissions");
         if(permissionsPlugin != null) {
             permissionHandler = ((Permissions) permissionsPlugin).getHandler();
+        }
+    }
+
+    private GeoIPLookup getGeoIPLookup() {
+        Plugin pl = this.getServer().getPluginManager().getPlugin("GeoIPTools");
+        if(pl != null) {
+            return ((GeoIPTools) pl).getGeoIPLookup(GeoIPLookup.COUNTRYDATABASE
+                                                    | GeoIPLookup.IPV6DATABASE);
+        } else {
+            return null;
         }
     }
 }
