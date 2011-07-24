@@ -1,7 +1,5 @@
-\.orig$
-\.orig\..*$
-\.chg\..*$
-\.rej$
-\.conflict\~$
-lib/bukkit-0.0.1-SNAPSHOT.jar
-lib/Permissions.jar
+syntax: glob
+lib/**
+build/**
+nbproject/**
+dist/**
