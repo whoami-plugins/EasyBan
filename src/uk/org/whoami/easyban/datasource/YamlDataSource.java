@@ -156,6 +156,20 @@ public class YamlDataSource extends Configuration implements DataSource {
 
     @Override
     public synchronized boolean isIpBanned(String ip) {
+        Iterator<String> it = bans.keySet().iterator();
+
+        while(it.hasNext()) {
+            String bannedNick = it.next();
+            if(history.containsKey(bannedNick) && history.get(bannedNick).
+                    contains(ip)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public boolean isSubnetBanned(String ip) {
         Iterator<String> itl = subnets.keySet().iterator();
         while(itl.hasNext()) {
             try {
@@ -164,16 +178,6 @@ public class YamlDataSource extends Configuration implements DataSource {
                     return true;
                 }
             } catch(UnknownHostException ex) {
-            }
-        }
-
-        Iterator<String> it = bans.keySet().iterator();
-
-        while(it.hasNext()) {
-            String bannedNick = it.next();
-            if(history.containsKey(bannedNick) && history.get(bannedNick).
-                    contains(ip)) {
-                return true;
             }
         }
         return false;

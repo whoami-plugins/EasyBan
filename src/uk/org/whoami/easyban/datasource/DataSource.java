@@ -35,6 +35,7 @@ public interface DataSource {
     public void unWhitelist(String nick);
 
     public boolean isIpBanned(String ip);
+    public boolean isSubnetBanned(String ip);
     public boolean isNickBanned(String nick);
     public boolean isCountryBanned(String code);
     public boolean isNickWhitelisted(String nick);

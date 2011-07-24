@@ -35,6 +35,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
+import uk.org.whoami.easyban.datasource.SQLDataSource;
 import uk.org.whoami.easyban.listener.EasyBanCountryListener;
 import uk.org.whoami.easyban.util.Subnet;
 import uk.org.whoami.geoip.GeoIPLookup;
@@ -72,8 +73,15 @@ public class EasyBan extends JavaPlugin {
 
         if(this.getConfiguration().getProperty("database").equals("yaml")) {
             database = new YamlDataSource(this);
+        } else if(this.getConfiguration().getProperty("database").equals("hsql")) {
+            try {
+                database = new SQLDataSource(this);
+            } catch(Exception ex) {
+                ConsoleLogger.info("Can't load database");
+            }
         } else {
             this.getServer().getPluginManager().disablePlugin(this);
+            return;
         }
 
         this.getServer().getPluginManager().registerEvent(Event.Type.PLAYER_JOIN,

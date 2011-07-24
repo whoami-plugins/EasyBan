@@ -47,5 +47,14 @@ public class EasyBanPlayerListener extends PlayerListener {
             player.kickPlayer(msg._("You are banned"));
             ConsoleLogger.info("Ban for " + name + " detected");
         }
+
+        if(database.isNickWhitelisted(event.getPlayer().getName())) {
+            return;
+        }
+
+        if(database.isSubnetBanned(ip)) {
+            player.kickPlayer(msg._("Your subnet is banned"));
+            ConsoleLogger.info("Subnet ban for " + name + "/"+ ip +" detected");
+        }
     }
 }
