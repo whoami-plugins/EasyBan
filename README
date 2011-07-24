@@ -1,6 +1,36 @@
 ## Installation ##
 Copy the EasyBan.jar to your craftbukkit plugins folder
 
+## Configuration ##
+### Country ban support ###
+Install this plugin:
+http://forums.bukkit.org/threads/dev-geoiptools-v0-1-api-for-lookups-in-the-maxmind-geoip-database-1000.27620/
+
+### Custom messages ###
+After the first start you'll find a messages.yml in "plugins/EasyBan/". To edit a message just change the part right of the ":".
+
+### Permissions ###
+easyban.${command} (e.g. easyban.ekick)
+
+## Usage ##
+/ekick playername - Kick a player
+/ehistory playername - List all ips of a player
+/ealternative playername - List all nicknames used by a player
+/eban playername [reason] [time] - Ban a player. When time is given the player will be banned for [time] minutes
+/eunban playername - Unban a player
+/ebaninfo playername - Show informations about a ban
+/elistbans - List all banned players
+/elisttmpbans - List all temporary bans
+/ebansubnet networkprefix/subnetmask [reason] - Ban a subnet(e.g. /esubnetban 24.64.23.0/255.255.252.0 or 24.64.23.0/22 or 2001:470:1f09:e26::/64)
+/eunbansubnet networkprefix/subnetmask - Unban a subnet
+/elistsubnets - List all banned subnets
+/ebancountry countrycode - Ban a country(Country codes can be found here: http://en.wikipedia.org/wiki/ISO_3166-1_alpha-2#Officially_assigned_code_elements)
+/eunbancountry countrycode - Unban a country
+/elistcountries - List all banned countries
+/ewhitelist playername - Whitelist a player; Useful when a range ban hits an innocent
+/eunwhitelist playername - Remove player from whitelist
+/elistwhite - List all whitelisted players
+
 ## License: ##
 https://www.apache.org/licenses/LICENSE-2.0.html
 
