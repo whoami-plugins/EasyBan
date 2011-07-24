@@ -119,8 +119,8 @@ public class SQLDataSource implements DataSource {
         try {
             createNick(nick);
             pst = con.prepareStatement(
-                    "SELECT ip FROM ip WHERE"
-                    + " player_id=(SELECT player_id FROM player WHERE player= ?) AND ip=?;");
+                    "SELECT ip FROM ip "
+                    + "WHERE player_id=(SELECT player_id FROM player WHERE player= ?) AND ip=?;");
             pst.setString(1, nick);
             pst.setString(2, ip);
             if(!pst.executeQuery().next()) {
@@ -264,8 +264,8 @@ public class SQLDataSource implements DataSource {
         PreparedStatement pst = null;
         try {
             pst = con.prepareStatement(
-                    "DELETE FROM whitelist WHERE "
-                    + "player_id=(SELECT player_id FROM player WHERE player=?);");
+                    "DELETE FROM whitelist "
+                    + "WHERE player_id=(SELECT player_id FROM player WHERE player=?);");
             pst.setString(1, nick);
             pst.executeUpdate();
         } catch(SQLException ex) {
@@ -278,7 +278,8 @@ public class SQLDataSource implements DataSource {
         PreparedStatement pst = null;
         try {
             pst = con.prepareStatement(
-                    "SELECT ip FROM ip WHERE player_id IN (SELECT player_id FROM player_ban) AND ip=?;");
+                    "SELECT ip FROM ip "
+                    + "WHERE player_id IN (SELECT player_id FROM player_ban) AND ip=?;");
             pst.setString(1, ip);
             return pst.executeQuery().next();
         } catch(SQLException ex) {
@@ -314,7 +315,8 @@ public class SQLDataSource implements DataSource {
         PreparedStatement pst = null;
         try {
             pst = con.prepareStatement(
-                    "SELECT player_id FROM player_ban WHERE player_id=(SELECT player_id FROM player WHERE player=?);");
+                    "SELECT player_id FROM player_ban "
+                    + "WHERE player_id=(SELECT player_id FROM player WHERE player=?);");
             pst.setString(1, nick);
             return pst.executeQuery().next();
         } catch(SQLException ex) {
@@ -342,7 +344,8 @@ public class SQLDataSource implements DataSource {
         PreparedStatement pst = null;
         try {
             pst = con.prepareStatement(
-                    "SELECT player_id FROM whitelist WHERE player_id=(SELECT player_id FROM player WHERE player=?);");
+                    "SELECT player_id FROM whitelist "
+                    + "WHERE player_id=(SELECT player_id FROM player WHERE player=?);");
             pst.setString(1, nick);
             return pst.executeQuery().next();
         } catch(SQLException ex) {
@@ -357,7 +360,8 @@ public class SQLDataSource implements DataSource {
         PreparedStatement pst = null;
         try {
             pst = con.prepareStatement(
-                    "SELECT ip FROM ip WHERE player_id=(SELECT player_id FROM player WHERE player=?);");
+                    "SELECT ip FROM ip "
+                    + "WHERE player_id=(SELECT player_id FROM player WHERE player=?);");
             pst.setString(1, nick);
             ResultSet rs = pst.executeQuery();
             while(rs.next()) {
@@ -377,7 +381,8 @@ public class SQLDataSource implements DataSource {
         try {
             st = con.createStatement();
             ResultSet rs = st.executeQuery(
-                    "SELECT player FROM player WHERE player_id IN (SELECT player_id FROM player_ban);");
+                    "SELECT player FROM player "
+                    + "WHERE player_id IN (SELECT player_id FROM player_ban);");
             while(rs.next()) {
                 list.add(rs.getString(1));
             }
@@ -429,7 +434,8 @@ public class SQLDataSource implements DataSource {
         try {
             st = con.createStatement();
             ResultSet rs = st.executeQuery(
-                    "SELECT player FROM player WHERE player_id IN (SELECT player_id FROM whitelist);");
+                    "SELECT player FROM player "
+                    + "WHERE player_id IN (SELECT player_id FROM whitelist);");
             while(rs.next()) {
                 list.add(rs.getString(1));
             }
@@ -446,7 +452,8 @@ public class SQLDataSource implements DataSource {
         PreparedStatement pst = null;
         try {
             pst = con.prepareStatement(
-                    "SELECT player FROM player WHERE player_id IN (SELECT player_id FROM ip WHERE ip=?);");
+                    "SELECT player FROM player "
+                    + "WHERE player_id IN (SELECT player_id FROM ip WHERE ip=?);");
             pst.setString(1, ip);
             ResultSet rs = pst.executeQuery();
             while(rs.next()) {
@@ -466,7 +473,9 @@ public class SQLDataSource implements DataSource {
         try {
             st = con.createStatement();
             ResultSet rs = st.executeQuery(
-                    "SELECT player,until FROM player_ban JOIN player ON player_ban.player_id=player.player_id WHERE until IS NOT NULL;");
+                    "SELECT player,until FROM player_ban "
+                    + "JOIN player ON player_ban.player_id=player.player_id "
+                    + "WHERE until IS NOT NULL;");
             while(rs.next()) {
                 map.put(rs.getString(1), rs.getTimestamp(2).getTime());
             }
@@ -483,7 +492,8 @@ public class SQLDataSource implements DataSource {
         PreparedStatement pst = null;
         try {
             pst = con.prepareStatement(
-                    "SELECT admin,reason,until FROM player_ban WHERE player_id=(SELECT player_id FROM player WHERE player=?);");
+                    "SELECT admin,reason,until FROM player_ban "
+                    + "WHERE player_id=(SELECT player_id FROM player WHERE player=?);");
             pst.setString(1, nick);
             ResultSet rs = pst.executeQuery();
             while(rs.next()) {
