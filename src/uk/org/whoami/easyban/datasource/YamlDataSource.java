@@ -27,7 +27,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.util.config.Configuration;
 import uk.org.whoami.easyban.util.Subnet;
 
-public class YamlDatasource extends Configuration implements Datasource {
+public class YamlDataSource extends Configuration implements DataSource {
 
     private final String banPath = "bans";
     private final String historyPath = "history";
@@ -41,7 +41,7 @@ public class YamlDatasource extends Configuration implements Datasource {
     private ArrayList<String> whitelist;
 
     @SuppressWarnings("unchecked")
-    public YamlDatasource(JavaPlugin plugin) {
+    public YamlDataSource(JavaPlugin plugin) {
         super(new File(plugin.getDataFolder(), "bans.yml"));
         load();
         if(getProperty(banPath) == null) {

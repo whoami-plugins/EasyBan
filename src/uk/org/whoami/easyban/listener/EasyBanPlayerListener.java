@@ -15,7 +15,7 @@
  */
 package uk.org.whoami.easyban.listener;
 
-import uk.org.whoami.easyban.datasource.Datasource;
+import uk.org.whoami.easyban.datasource.DataSource;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerListener;
@@ -24,10 +24,10 @@ import uk.org.whoami.easyban.Message;
 
 public class EasyBanPlayerListener extends PlayerListener {
 
-    private Datasource database;
+    private DataSource database;
     private Message msg;
 
-    public EasyBanPlayerListener(Datasource database) {
+    public EasyBanPlayerListener(DataSource database) {
         this.database = database;
         this.msg = Message.getInstance();
     }

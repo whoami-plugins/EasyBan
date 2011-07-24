@@ -20,16 +20,16 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerListener;
 import uk.org.whoami.easyban.ConsoleLogger;
 import uk.org.whoami.easyban.Message;
-import uk.org.whoami.easyban.datasource.Datasource;
+import uk.org.whoami.easyban.datasource.DataSource;
 import uk.org.whoami.geoip.GeoIPLookup;
 
 public class EasyBanCountryListener extends PlayerListener {
 
-    private Datasource database;
+    private DataSource database;
     private GeoIPLookup geo;
     private final Message m = Message.getInstance();
 
-    public EasyBanCountryListener(Datasource data, GeoIPLookup geo) {
+    public EasyBanCountryListener(DataSource data, GeoIPLookup geo) {
         this.database = data;
         this.geo = geo;
     }

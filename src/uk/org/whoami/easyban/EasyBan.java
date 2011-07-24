@@ -17,8 +17,8 @@ package uk.org.whoami.easyban;
 
 import uk.org.whoami.easyban.listener.EasyBanPlayerListener;
 import uk.org.whoami.easyban.tasks.UnbanTask;
-import uk.org.whoami.easyban.datasource.Datasource;
-import uk.org.whoami.easyban.datasource.YamlDatasource;
+import uk.org.whoami.easyban.datasource.DataSource;
+import uk.org.whoami.easyban.datasource.YamlDataSource;
 import com.nijiko.permissions.PermissionHandler;
 import com.nijikokun.bukkit.Permissions.Permissions;
 import java.io.File;
@@ -42,7 +42,7 @@ import uk.org.whoami.geoip.GeoIPTools;
 
 public class EasyBan extends JavaPlugin {
 
-    private Datasource database;
+    private DataSource database;
     private PermissionHandler permissionHandler;
     private final File data = new File(this.getDataFolder(), "plugins/EasyBan/");
     private Message m;
@@ -71,7 +71,7 @@ public class EasyBan extends JavaPlugin {
         m.updateMessages(this.getConfiguration());
 
         if(this.getConfiguration().getProperty("database").equals("yaml")) {
-            database = new YamlDatasource(this);
+            database = new YamlDataSource(this);
         } else {
             this.getServer().getPluginManager().disablePlugin(this);
         }

@@ -18,7 +18,7 @@ package uk.org.whoami.easyban.datasource;
 import java.util.HashMap;
 import uk.org.whoami.easyban.util.Subnet;
 
-public interface Datasource {
+public interface DataSource {
 
     public void addIpToHistory(String nick,String ip);
 

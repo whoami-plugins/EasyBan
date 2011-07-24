@@ -20,13 +20,13 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Iterator;
 import uk.org.whoami.easyban.ConsoleLogger;
-import uk.org.whoami.easyban.datasource.Datasource;
+import uk.org.whoami.easyban.datasource.DataSource;
 
 public class UnbanTask implements Runnable {
 
-    private Datasource data;
+    private DataSource data;
 
-    public UnbanTask(Datasource data) {
+    public UnbanTask(DataSource data) {
         this.data = data;
     }
 
