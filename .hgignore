@@ -5,5 +5,3 @@
 \.conflict\~$
 lib/bukkit-0.0.1-SNAPSHOT.jar
 lib/Permissions.jar
-^lib$
-^lib/CopyLibs$
