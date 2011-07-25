@@ -58,7 +58,7 @@ public class Message extends Configuration {
                 " has been removed from the whitelist");
         map.put("Whitelist: ", "Whitelist: ");
         map.put("Alternative nicks of ", "Alternative nicks of ");
-        map.put("Your subnet is banned","Your subnet is banned");
+        map.put("Your subnet is banned", "Your subnet is banned");
     }
 
     public String _(String message) {
@@ -71,7 +71,9 @@ public class Message extends Configuration {
 
     public void updateMessages(Configuration conf) {
         for(String key : conf.getKeys()) {
-            if(key.equals("database") || key.equals("maxmind") || key.equals("maxmindv6")) {
+            if(key.equals("database") || key.equals("maxmind") || key.equals(
+                    "maxmindv6") || key.equals("host") || key.equals("port")
+               || key.equals("username") || key.equals("password")) {
                 continue;
             }
 

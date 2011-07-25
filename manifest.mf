@@ -1,2 +1,2 @@
 Manifest-Version: 1.0
-Class-Path: ../lib/hsqldb.jar
+Class-Path: ../lib/hsqldb.jar ../lib/mysql-connector-java-bin.jar

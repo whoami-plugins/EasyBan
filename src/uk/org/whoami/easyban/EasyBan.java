@@ -35,7 +35,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
-import uk.org.whoami.easyban.datasource.SQLDataSource;
+import uk.org.whoami.easyban.datasource.HSQLDataSource;
+import uk.org.whoami.easyban.datasource.MySQLDataSource;
 import uk.org.whoami.easyban.listener.EasyBanCountryListener;
 import uk.org.whoami.easyban.util.Subnet;
 import uk.org.whoami.geoip.GeoIPLookup;
@@ -75,8 +76,20 @@ public class EasyBan extends JavaPlugin {
             database = new YamlDataSource(this);
         } else if(this.getConfiguration().getProperty("database").equals("hsql")) {
             try {
-                database = new SQLDataSource(this);
+                database = new HSQLDataSource(this);
             } catch(Exception ex) {
+                ConsoleLogger.info(ex.getMessage());
+                ConsoleLogger.info("Can't load database");
+            }
+        } else if(this.getConfiguration().getProperty("database").equals("mysql")) {
+                String host = this.getConfiguration().getString("host");
+                String port = this.getConfiguration().getString("port");
+                String user = this.getConfiguration().getString("username");
+                String password = this.getConfiguration().getString("password");
+            try {
+                database = new MySQLDataSource(host,port,user,password);
+            } catch(Exception ex) {
+                ConsoleLogger.info(ex.getMessage());
                 ConsoleLogger.info("Can't load database");
             }
         } else {
