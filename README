@@ -12,6 +12,20 @@ Create a "lib" directory in your server root and copy the downloaded file to
 that directory. Open the config.yml in plugins/EasyBan/ and replace 
 "database: yaml" with database: hsql
 
+### MySQL ###
+To use MySQL as data backend download <http://dev.mysql.com/downloads/connector/j/>.
+In that zip archive is a "mysql-connector-java-${VERSION}-bin.jar" file. Rename
+that file to "mysql-connector-java-bin.jar" and move it to the "lib" directory
+in your craftbukkit root folder. When the "lib" folder doesn't exist create it.
+Now create a database with the name "easyban" in mysql. Open the config.yml in 
+plugins/EasyBan/ and replace "database: yaml" with "database: mysql". Additionally
+you have to add these 4 settings:
+
+host: 'XYZ'  # MySQL Server address
+port: 'XYZ'  # MySQL Server port
+username: 'XYZ' # MySQL user
+password: 'XYZ' # password for that user
+
 ### Custom messages ###
 After the first start you'll find a messages.yml in "plugins/EasyBan/". To edit
 a message just change the part right of the ":".
