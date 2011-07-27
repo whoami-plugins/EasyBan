@@ -15,6 +15,7 @@
  */
 package uk.org.whoami.easyban;
 
+import java.net.UnknownHostException;
 import uk.org.whoami.easyban.listener.EasyBanPlayerListener;
 import uk.org.whoami.easyban.tasks.UnbanTask;
 import uk.org.whoami.easyban.datasource.DataSource;
@@ -22,6 +23,7 @@ import uk.org.whoami.easyban.datasource.YamlDataSource;
 import com.nijiko.permissions.PermissionHandler;
 import com.nijikokun.bukkit.Permissions.Permissions;
 import java.io.File;
+import java.net.InetAddress;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -82,12 +84,12 @@ public class EasyBan extends JavaPlugin {
                 ConsoleLogger.info("Can't load database");
             }
         } else if(this.getConfiguration().getProperty("database").equals("mysql")) {
-                String host = this.getConfiguration().getString("host");
-                String port = this.getConfiguration().getString("port");
-                String user = this.getConfiguration().getString("username");
-                String password = this.getConfiguration().getString("password");
+            String host = this.getConfiguration().getString("host");
+            String port = this.getConfiguration().getString("port");
+            String user = this.getConfiguration().getString("username");
+            String password = this.getConfiguration().getString("password");
             try {
-                database = new MySQLDataSource(host,port,user,password);
+                database = new MySQLDataSource(host, port, user, password);
             } catch(Exception ex) {
                 ConsoleLogger.info(ex.getMessage());
                 ConsoleLogger.info("Can't load database");
@@ -161,14 +163,19 @@ public class EasyBan extends JavaPlugin {
             if(args.length == 0 || !perm) {
                 return true;
             }
+            try {
+                InetAddress.getByName(args[0]);
+                sender.sendMessage(m._("Users who connected from IP") + args[0]);
+                this.sendListToSender(sender, database.getNicks(args[0]));
+            } catch(UnknownHostException ex) {
+                ArrayList<String> nicks = new ArrayList<String>();
 
-            ArrayList<String> nicks = new ArrayList<String>();
-
-            for(String ip : database.getHistory(args[0])) {
-                Collections.addAll(nicks, database.getNicks(ip));
+                for(String ip : database.getHistory(args[0])) {
+                    Collections.addAll(nicks, database.getNicks(ip));
+                }
+                sender.sendMessage(m._("Alternative nicks of ") + args[0]);
+                this.sendListToSender(sender, nicks.toArray(new String[0]));
             }
-            sender.sendMessage(m._("Alternative nicks of ") + args[0]);
-            this.sendListToSender(sender, nicks.toArray(new String[0]));
             return true;
         }
 
