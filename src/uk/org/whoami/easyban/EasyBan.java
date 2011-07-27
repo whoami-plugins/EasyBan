@@ -93,6 +93,7 @@ public class EasyBan extends JavaPlugin {
                 ConsoleLogger.info("Can't load database");
             }
         } else {
+            ConsoleLogger.info("Unsupported database");
             this.getServer().getPluginManager().disablePlugin(this);
             return;
         }
