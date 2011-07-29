@@ -16,6 +16,7 @@
 package uk.org.whoami.easyban;
 
 import java.net.UnknownHostException;
+import java.sql.SQLException;
 import uk.org.whoami.easyban.listener.EasyBanPlayerListener;
 import uk.org.whoami.easyban.tasks.UnbanTask;
 import uk.org.whoami.easyban.datasource.DataSource;
@@ -79,7 +80,7 @@ public class EasyBan extends JavaPlugin {
         } else if(this.getConfiguration().getProperty("database").equals("hsql")) {
             try {
                 database = new HSQLDataSource(this);
-            } catch(Exception ex) {
+            } catch(ClassNotFoundException | SQLException ex) {
                 ConsoleLogger.info(ex.getMessage());
                 ConsoleLogger.info("Can't load database");
             }
@@ -90,7 +91,7 @@ public class EasyBan extends JavaPlugin {
             String password = this.getConfiguration().getString("password");
             try {
                 database = new MySQLDataSource(host, port, user, password);
-            } catch(Exception ex) {
+            } catch(ClassNotFoundException | SQLException ex) {
                 ConsoleLogger.info(ex.getMessage());
                 ConsoleLogger.info("Can't load database");
             }
@@ -168,7 +169,7 @@ public class EasyBan extends JavaPlugin {
                 sender.sendMessage(m._("Users who connected from IP") + args[0]);
                 this.sendListToSender(sender, database.getNicks(args[0]));
             } catch(UnknownHostException ex) {
-                ArrayList<String> nicks = new ArrayList<String>();
+                ArrayList<String> nicks = new ArrayList<>();
 
                 for(String ip : database.getHistory(args[0])) {
                     Collections.addAll(nicks, database.getNicks(ip));

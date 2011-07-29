@@ -22,7 +22,7 @@ import org.bukkit.util.config.Configuration;
 public class Message extends Configuration {
 
     private static Message singleton = null;
-    private final HashMap<String, String> map = new HashMap<String, String>();
+    private final HashMap<String, String> map = new HashMap<>();
 
     private Message(File folder) {
         super(new File(folder, "messages.yml"));
