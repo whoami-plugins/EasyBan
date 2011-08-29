@@ -39,7 +39,7 @@ public class UnbanTask implements Runnable {
             String name = it.next();
             if(tmpBans.get(name) != 100000 && (cal.getTimeInMillis() > tmpBans.get(name))) {
                 data.unbanNick(name);
-                ConsoleLogger.info("Temporary for "+ name +" ban has been removed");
+                ConsoleLogger.info("Temporary ban for "+ name +" has been removed");
             }
         }
     }
