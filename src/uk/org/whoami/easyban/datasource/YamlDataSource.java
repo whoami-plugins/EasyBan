@@ -87,7 +87,7 @@ public class YamlDataSource extends Configuration implements DataSource {
     public synchronized void banNick(String nick, String admin, String reason,
             Long until) {
         if(!bans.containsKey(nick)) {
-            HashMap<String, String> tmp = new HashMap<>();
+            HashMap<String, String> tmp = new HashMap<String, String>();
             tmp.put("admin", admin);
             if(reason != null) {
                 tmp.put("reason", reason);
@@ -112,7 +112,7 @@ public class YamlDataSource extends Configuration implements DataSource {
     public synchronized void banSubnet(Subnet subnet, String admin,
             String reason) {
         if(!subnets.containsKey(subnet.toString())) {
-            HashMap<String, String> tmp = new HashMap<>();
+            HashMap<String, String> tmp = new HashMap<String, String>();
             tmp.put("admin", admin);
             tmp.put("reason", reason);
             subnets.put(subnet.toString(), tmp);
@@ -228,7 +228,7 @@ public class YamlDataSource extends Configuration implements DataSource {
 
     @Override
     public String[] getNicks(String ip) {
-        ArrayList<String> nicks = new ArrayList<>();
+        ArrayList<String> nicks = new ArrayList<String>();
 
         for(Entry<String,List<String>> entry:history.entrySet()) {
             if(entry.getValue().contains(ip)) {
@@ -240,7 +240,7 @@ public class YamlDataSource extends Configuration implements DataSource {
 
     @Override
     public synchronized HashMap<String, Long> getTempBans() {
-        HashMap<String, Long> tmpBans = new HashMap<>();
+        HashMap<String, Long> tmpBans = new HashMap<String, Long>();
         Iterator<String> it = bans.keySet().iterator();
         while(it.hasNext()) {
             String nick = it.next();
