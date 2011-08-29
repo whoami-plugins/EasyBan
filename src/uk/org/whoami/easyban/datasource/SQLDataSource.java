@@ -423,6 +423,7 @@ public abstract class SQLDataSource implements DataSource {
                     + "JOIN player ON player_ban.player_id=player.player_id "
                     + "WHERE until IS NOT NULL;");
             while(rs.next()) {
+                if(rs.getTimestamp(2).getTime() == 0) continue;
                 map.put(rs.getString(1), rs.getTimestamp(2).getTime());
             }
         } catch(SQLException ex) {

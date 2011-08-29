@@ -37,7 +37,7 @@ public class UnbanTask implements Runnable {
         Iterator<String> it = tmpBans.keySet().iterator();
         while(it.hasNext()) {
             String name = it.next();
-            if(cal.getTimeInMillis() > tmpBans.get(name)) {
+            if(tmpBans.get(name) != 0 && (cal.getTimeInMillis() > tmpBans.get(name))) {
                 data.unbanNick(name);
                 ConsoleLogger.info("Temporary for "+ name +" ban has been removed");
             }
