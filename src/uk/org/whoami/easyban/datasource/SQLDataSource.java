@@ -302,7 +302,7 @@ public abstract class SQLDataSource implements DataSource {
 
     @Override
     public synchronized String[] getHistory(String nick) {
-        ArrayList<String> list = new ArrayList<String>();
+        ArrayList<String> list = new ArrayList<>();
         PreparedStatement pst = null;
         try {
             pst = con.prepareStatement(
@@ -322,7 +322,7 @@ public abstract class SQLDataSource implements DataSource {
 
     @Override
     public synchronized String[] getBannedNicks() {
-        ArrayList<String> list = new ArrayList<String>();
+        ArrayList<String> list = new ArrayList<>();
         Statement st = null;
         try {
             st = con.createStatement();
@@ -341,7 +341,7 @@ public abstract class SQLDataSource implements DataSource {
 
     @Override
     public synchronized String[] getBannedSubnets() {
-        ArrayList<String> list = new ArrayList<String>();
+        ArrayList<String> list = new ArrayList<>();
         Statement st = null;
         try {
             st = con.createStatement();
@@ -358,7 +358,7 @@ public abstract class SQLDataSource implements DataSource {
 
     @Override
     public synchronized String[] getBannedCountries() {
-        ArrayList<String> list = new ArrayList<String>();
+        ArrayList<String> list = new ArrayList<>();
         Statement st = null;
         try {
             st = con.createStatement();
@@ -375,7 +375,7 @@ public abstract class SQLDataSource implements DataSource {
 
     @Override
     public synchronized String[] getWhitelistedNicks() {
-        ArrayList<String> list = new ArrayList<String>();
+        ArrayList<String> list = new ArrayList<>();
         Statement st = null;
         try {
             st = con.createStatement();
@@ -394,7 +394,7 @@ public abstract class SQLDataSource implements DataSource {
 
     @Override
     public synchronized String[] getNicks(String ip) {
-        ArrayList<String> list = new ArrayList<String>();
+        ArrayList<String> list = new ArrayList<>();
         PreparedStatement pst = null;
         try {
             pst = con.prepareStatement(
@@ -414,7 +414,7 @@ public abstract class SQLDataSource implements DataSource {
 
     @Override
     public synchronized HashMap<String, Long> getTempBans() {
-        HashMap<String, Long> map = new HashMap<String, Long>();
+        HashMap<String, Long> map = new HashMap<>();
         Statement st = null;
         try {
             st = con.createStatement();
@@ -435,7 +435,7 @@ public abstract class SQLDataSource implements DataSource {
 
     @Override
     public synchronized HashMap<String, String> getBanInformation(String nick) {
-        HashMap<String, String> map = new HashMap<String, String>();
+        HashMap<String, String> map = new HashMap<>();
         PreparedStatement pst = null;
         try {
             pst = con.prepareStatement(
@@ -462,7 +462,7 @@ public abstract class SQLDataSource implements DataSource {
 
     @Override
     public synchronized HashMap<String, String> getBanInformation(Subnet subnet) {
-        HashMap<String, String> map = new HashMap<String, String>();
+        HashMap<String, String> map = new HashMap<>();
         PreparedStatement pst = null;
         try {
             pst = con.prepareStatement(
