@@ -84,12 +84,13 @@ public class EasyBan extends JavaPlugin {
                 ConsoleLogger.info("Can't load database");
             }
         } else if(this.getConfiguration().getProperty("database").equals("mysql")) {
+            String schema = this.getConfiguration().getString("schema", "easyban");
             String host = this.getConfiguration().getString("host");
             String port = this.getConfiguration().getString("port");
             String user = this.getConfiguration().getString("username");
             String password = this.getConfiguration().getString("password");
             try {
-                database = new MySQLDataSource(host, port, user, password);
+                database = new MySQLDataSource(schema, host, port, user, password);
             } catch(Exception ex) {
                 ConsoleLogger.info(ex.getMessage());
                 ConsoleLogger.info("Can't load database");

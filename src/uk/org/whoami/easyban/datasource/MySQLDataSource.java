@@ -25,14 +25,16 @@ import uk.org.whoami.easyban.ConsoleLogger;
  * @author Sebastian Köhler <sebkoehler@whoami.org.uk>
  */
 public class MySQLDataSource extends SQLDataSource {
-
+    
+    private String schema;
     private String host;
     private String port;
     private String username;
     private String password;
 
-    public MySQLDataSource(String host, String port, String username,
+    public MySQLDataSource(String schema, String host, String port, String username,
             String password) throws ClassNotFoundException, SQLException {
+        this.schema = schema;
         this.host = host;
         this.port = port;
         this.username = username;
@@ -48,7 +50,7 @@ public class MySQLDataSource extends SQLDataSource {
         Class.forName("com.mysql.jdbc.Driver");
         ConsoleLogger.info("MySQL driver loaded");
         con = DriverManager.getConnection("jdbc:mysql://" + host + ":" + port
-                                          + "/easyban", username, password);
+                                          + "/" + schema, username, password);
         ConsoleLogger.info("Connected to Database");
     }
 

@@ -74,7 +74,7 @@ public class Message extends Configuration {
         for(String key : conf.getKeys()) {
             if(key.equals("database") || key.equals("maxmind") || key.equals(
                     "maxmindv6") || key.equals("host") || key.equals("port")
-               || key.equals("username") || key.equals("password")) {
+               || key.equals("username") || key.equals("password") || key.equals("schema")) {
                 continue;
             }
 

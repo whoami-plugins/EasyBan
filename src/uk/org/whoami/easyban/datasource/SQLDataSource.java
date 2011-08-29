@@ -106,7 +106,7 @@ public abstract class SQLDataSource implements DataSource {
             if(until != null) {
                 pst.setTimestamp(4, new Timestamp(until));
             } else {
-                pst.setNull(4, Types.TIMESTAMP);
+                pst.setTimestamp(4, new Timestamp(100000));
             }
             pst.executeUpdate();
         } catch(SQLException ex) {
@@ -423,7 +423,7 @@ public abstract class SQLDataSource implements DataSource {
                     + "JOIN player ON player_ban.player_id=player.player_id "
                     + "WHERE until IS NOT NULL;");
             while(rs.next()) {
-                if(rs.getTimestamp(2).getTime() == 0) continue;
+                if(rs.getTimestamp(2).getTime() == 100000) continue;
                 map.put(rs.getString(1), rs.getTimestamp(2).getTime());
             }
         } catch(SQLException ex) {
