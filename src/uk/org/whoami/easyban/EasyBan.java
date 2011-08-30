@@ -20,8 +20,6 @@ import uk.org.whoami.easyban.listener.EasyBanPlayerListener;
 import uk.org.whoami.easyban.tasks.UnbanTask;
 import uk.org.whoami.easyban.datasource.DataSource;
 import uk.org.whoami.easyban.datasource.YamlDataSource;
-import com.nijiko.permissions.PermissionHandler;
-import com.nijikokun.bukkit.Permissions.Permissions;
 import java.io.File;
 import java.net.InetAddress;
 import java.text.DateFormat;
@@ -47,7 +45,6 @@ import uk.org.whoami.geoip.GeoIPTools;
 public class EasyBan extends JavaPlugin {
 
     private DataSource database;
-    private PermissionHandler permissionHandler;
     private final File data = new File(this.getDataFolder(), "plugins/EasyBan/");
     private Message m;
 
@@ -67,7 +64,6 @@ public class EasyBan extends JavaPlugin {
     @Override
     public void onEnable() {
         initConfig();
-        setupPermission();
         if(!data.exists()) {
             data.mkdirs();
         }
@@ -119,22 +115,10 @@ public class EasyBan extends JavaPlugin {
     }
 
     @Override
-    public boolean onCommand(CommandSender sender, Command cmd, String label,
-            String[] args) {
-        boolean perm = true;
-        String admin = "Console";
-        if(sender instanceof Player) {
-            if(permissionHandler == null || !permissionHandler.has(
-                    (Player) sender, "easyban." + label)) {
-                perm = false;
-            }
-            admin = ((Player) sender).getName();
-        }
-
-        if(sender.isOp()) {
-            perm = true;
-        }
-
+    public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
+        boolean perm = sender.hasPermission("easyban."+ label.toLowerCase());
+        String admin = sender instanceof Player ? ((Player)sender).getName() : "Console";
+        
         if(label.equalsIgnoreCase("ekick")) {
             if(args.length == 0 || !perm) {
                 return true;
@@ -154,7 +138,6 @@ public class EasyBan extends JavaPlugin {
             if(args.length == 0 || !perm) {
                 return true;
             }
-
             sender.sendMessage(m._("Ips from ") + args[0]);
             this.sendListToSender(sender, database.getHistory(args[0]));
             return true;
@@ -435,14 +418,6 @@ public class EasyBan extends JavaPlugin {
                 }
             }
             sender.sendMessage(send);
-        }
-    }
-
-    private void setupPermission() {
-        Plugin permissionsPlugin = this.getServer().getPluginManager().
-                getPlugin("Permissions");
-        if(permissionsPlugin != null) {
-            permissionHandler = ((Permissions) permissionsPlugin).getHandler();
         }
     }
 

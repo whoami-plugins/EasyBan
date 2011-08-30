@@ -1,6 +1,6 @@
 name: EasyBan
 main: uk.org.whoami.easyban.EasyBan
-version: 1.5
+version: 1.6
 commands:
     ekick:
         description: Kick player
@@ -53,3 +53,55 @@ commands:
     elistwhite:
         description: Show whitelisted players
         usage: /elistwhite
+permissions:
+    easyban.ekick:
+        description: Allows you to kick a user
+        default: op
+    easyban.ehistory:
+        description: List all ips of a player
+        default: op
+    easyban.ealternative:
+        description: Get alternative nicknames of a player
+        default: op
+    easyban.eban:
+        description: Ban player
+        default: op
+    easyban.eunban:
+        description: Unban player
+        default: op
+    easyban.ebaninfo:
+        description: Get informations about a ban
+        default: op
+    easyban.elistbans:
+        description: List all banned players
+        default: op
+    easyban.elisttmpbans:
+        description: List all temporary bans
+        default: op
+    easyban.ebansubnet:
+        description: Ban a whole subnet
+        default: op
+    easyban.eunbansubnet:
+        description: Unban a whole subnet
+        default: op
+    easyban.elistsubnets:
+        description: List all banned subnets
+        default: op
+    easyban.ebancountry:
+        description: Ban a country
+        default: op
+    easyban.eunbancountry:
+        description: Unban a country
+        default: op
+    easyban.elistcountries:
+        description: Show all banned countries
+        default: op
+    easyban.ewhitelist:
+        description: Whitelist players from range bans
+        default: op
+    easyban.eunwhitelist:
+        description: Unwhitelist a player
+        default: op
+    easyban.elistwhite:
+        description: Show whitelisted players
+        default: op
