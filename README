@@ -4,7 +4,7 @@ Copy the EasyBan.jar to your craftbukkit plugins folder
 ## Configuration ##
 ### Country ban support ###
 Install this plugin:
-http://forums.bukkit.org/threads/dev-geoiptools-v0-1-api-for-lookups-in-the-maxmind-geoip-database-1000.27620/
+http://forums.bukkit.org/threads/27620/
 
 ### HSQLDB ###
 To use the HSQL database download http://stuff.whoami.org.uk/hsqldb/hsqldb.jar.
@@ -17,10 +17,10 @@ To use MySQL as data backend download <http://dev.mysql.com/downloads/connector/
 In that zip archive is a "mysql-connector-java-${VERSION}-bin.jar" file. Rename
 that file to "mysql-connector-java-bin.jar" and move it to the "lib" directory
 in your craftbukkit root folder. When the "lib" folder doesn't exist create it.
-Now create a database with the name "easyban" in mysql. Open the config.yml in 
+Now create a database with a name of your choice. Open the config.yml in 
 plugins/EasyBan/ and replace "database: yaml" with "database: mysql". Additionally
-you have to add these 4 settings:
-
+you have to add these 5 settings:
+schema: 'XYZ' # database name(when not given it defaults to 'easyban')
 host: 'XYZ'  # MySQL Server address
 port: 'XYZ'  # MySQL Server port
 username: 'XYZ' # MySQL user
