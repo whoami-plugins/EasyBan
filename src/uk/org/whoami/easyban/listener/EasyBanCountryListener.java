@@ -16,8 +16,10 @@
 package uk.org.whoami.easyban.listener;
 
 import java.net.InetAddress;
-import org.bukkit.event.player.PlayerJoinEvent;
+import java.net.UnknownHostException;
 import org.bukkit.event.player.PlayerListener;
+import org.bukkit.event.player.PlayerLoginEvent;
+import org.bukkit.event.player.PlayerLoginEvent.Result;
 import uk.org.whoami.easyban.ConsoleLogger;
 import uk.org.whoami.easyban.Message;
 import uk.org.whoami.easyban.datasource.DataSource;
@@ -35,22 +37,28 @@ public class EasyBanCountryListener extends PlayerListener {
     }
 
     @Override
-    public void onPlayerJoin(PlayerJoinEvent event) {
-        if(event.getPlayer() == null) {
+    public void onPlayerLogin(PlayerLoginEvent evt) {
+        if (evt.getPlayer() == null || !evt.getResult().equals(Result.ALLOWED)) {
             return;
         }
 
-        if(database.isNickWhitelisted(event.getPlayer().getName())) {
+        String nick = evt.getPlayer().getName();
+        String ip = evt.getKickMessage();
+
+        if (database.isNickWhitelisted(nick)) {
             return;
         }
 
-        InetAddress ip = event.getPlayer().getAddress().getAddress();
-        String code = geo.getCountry(ip).getCode();
+        try {
+            InetAddress inet = InetAddress.getByName(ip);
+            String code = geo.getCountry(inet).getCode();
 
-        if(database.isCountryBanned(code)) {
-            ConsoleLogger.info("Player " + event.getPlayer().getName()
-                               + "is from banned country " + code);
-            event.getPlayer().kickPlayer(m._("Your country has been banned"));
+            if (database.isCountryBanned(code)) {
+                ConsoleLogger.info("Player " + nick + "is from banned country " + code);
+                evt.disallow(Result.KICK_BANNED, m._("Your country has been banned"));
+            }
+        } catch (UnknownHostException ex) {
+            ConsoleLogger.info(ex.getMessage());
         }
     }
 }

@@ -96,20 +96,22 @@ public class EasyBan extends JavaPlugin {
             this.getServer().getPluginManager().disablePlugin(this);
             return;
         }
-
-        this.getServer().getPluginManager().registerEvent(Event.Type.PLAYER_JOIN,
+        
+        this.getServer().getPluginManager().registerEvent(Event.Type.PLAYER_LOGIN,
                 new EasyBanPlayerListener(database),
-                Event.Priority.Highest, this);
-
+                Event.Priority.Lowest, this);
+        
         GeoIPLookup geo = getGeoIPLookup();
         if(geo != null) {
             this.getServer().getPluginManager().registerEvent(
-                    Event.Type.PLAYER_JOIN,
+                    Event.Type.PLAYER_LOGIN,
                     new EasyBanCountryListener(database, geo),
-                    Event.Priority.Low, this);
+                    Event.Priority.Lowest, this);
         }
+        
         this.getServer().getScheduler().scheduleAsyncRepeatingTask(this,
                 new UnbanTask(database), 60L, 1200L);
+        
         ConsoleLogger.info("EasyBan enabled; Version: " + this.getDescription().
                 getVersion());
     }

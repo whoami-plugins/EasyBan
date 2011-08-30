@@ -16,9 +16,9 @@
 package uk.org.whoami.easyban.listener;
 
 import uk.org.whoami.easyban.datasource.DataSource;
-import org.bukkit.entity.Player;
-import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerListener;
+import org.bukkit.event.player.PlayerLoginEvent;
+import org.bukkit.event.player.PlayerLoginEvent.Result;
 import uk.org.whoami.easyban.ConsoleLogger;
 import uk.org.whoami.easyban.Message;
 
@@ -31,20 +31,20 @@ public class EasyBanPlayerListener extends PlayerListener {
         this.database = database;
         this.msg = Message.getInstance();
     }
-
+    
     @Override
-    public void onPlayerJoin(PlayerJoinEvent event) {
-        if(event.getPlayer() == null) {
+    public void onPlayerLogin(PlayerLoginEvent event) {
+        if(event.getPlayer() == null || !event.getResult().equals(Result.ALLOWED)) {
             return;
         }
-        Player player = event.getPlayer();
-        String name = player.getName();
-        String ip = player.getAddress().getAddress().getHostAddress();
+        
+        String name = event.getPlayer().getName();
+        String ip = event.getKickMessage();
 
         database.addIpToHistory(name, ip);
 
         if (database.isNickBanned(name) || database.isIpBanned(ip)) {
-            player.kickPlayer(msg._("You are banned"));
+            event.disallow(Result.KICK_BANNED, msg._("You are banned"));
             ConsoleLogger.info("Ban for " + name + " detected");
         }
 
@@ -53,7 +53,7 @@ public class EasyBanPlayerListener extends PlayerListener {
         }
 
         if(database.isSubnetBanned(ip)) {
-            player.kickPlayer(msg._("Your subnet is banned"));
+            event.disallow(Result.KICK_BANNED, msg._("Your subnet is banned"));
             ConsoleLogger.info("Subnet ban for " + name + "/"+ ip +" detected");
         }
     }
