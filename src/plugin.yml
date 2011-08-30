@@ -54,6 +54,26 @@ commands:
         description: Show whitelisted players
         usage: /elistwhite
 permissions:
+    easyban.*:
+        description: Gives access to all EasyBan commands
+        children:
+            easyban.ekick: true
+            easyban.ehistory: true
+            easyban.ealternative: true
+            easyban.eban: true
+            easyban.eunban: true
+            easyban.ebaninfo: true
+            easyban.elistbans: true
+            easyban.elisttmpbans: true
+            easyban.ebansubnet: true
+            easyban.eunbansubnet: true
+            easyban.elistsubnets: true
+            easyban.ebancountry: true
+            easyban.eunbancountry: true
+            easyban.elistcountries: true
+            easyban.ewhitelist: true
+            easyban.eunwhitelist: true
+            easyban.elistwhite: true
     easyban.ekick:
         description: Allows you to kick a user
         default: op
