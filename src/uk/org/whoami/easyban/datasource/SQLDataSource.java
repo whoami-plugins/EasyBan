@@ -34,7 +34,7 @@ public abstract class SQLDataSource implements DataSource {
     protected Connection con;
 
     protected abstract void connect() throws ClassNotFoundException,
-                                             SQLException;
+            SQLException;
 
     protected abstract void setup() throws SQLException;
 
@@ -47,15 +47,20 @@ public abstract class SQLDataSource implements DataSource {
             pst = con.prepareStatement(
                     "SELECT player FROM player WHERE player=?");
             pst.setString(1, nick);
-            if(!pst.executeQuery().next()) {
+            if (!pst.executeQuery().next()) {
                 pst.close();
                 pst = con.prepareStatement(
                         "INSERT INTO player (player) VALUES(?);");
                 pst.setString(1, nick);
                 pst.executeUpdate();
             }
-        } catch(SQLException ex) {
-            throw new SQLException(ex);
+        } finally {
+            if (pst != null) {
+                try {
+                    pst.close();
+                } catch (SQLException ex) {
+                }
+            }
         }
     }
 
@@ -69,18 +74,25 @@ public abstract class SQLDataSource implements DataSource {
                     + "WHERE player_id=(SELECT player_id FROM player WHERE player= ?) AND ip=?;");
             pst.setString(1, nick);
             pst.setString(2, ip);
-            if(!pst.executeQuery().next()) {
+            if (!pst.executeQuery().next()) {
                 pst.close();
                 pst = con.prepareStatement("INSERT INTO ip (player_id,ip) VALUES("
-                                           + "(SELECT player_id FROM player WHERE player= ? ),"
-                                           + "?"
-                                           + ");");
+                        + "(SELECT player_id FROM player WHERE player= ? ),"
+                        + "?"
+                        + ");");
                 pst.setString(1, nick);
                 pst.setString(2, ip);
                 pst.executeUpdate();
             }
-        } catch(SQLException ex) {
+        } catch (SQLException ex) {
             ConsoleLogger.info(ex.getMessage());
+        } finally {
+            if (pst != null) {
+                try {
+                    pst.close();
+                } catch (SQLException ex) {
+                }
+            }
         }
     }
 
@@ -91,26 +103,33 @@ public abstract class SQLDataSource implements DataSource {
         try {
             createNick(nick);
             pst = con.prepareStatement("INSERT INTO player_ban (player_id,admin,reason,until) VALUES("
-                                       + "(SELECT player_id FROM player WHERE player= ? ),"
-                                       + "?,"
-                                       + "?,"
-                                       + "?"
-                                       + ");");
+                    + "(SELECT player_id FROM player WHERE player= ? ),"
+                    + "?,"
+                    + "?,"
+                    + "?"
+                    + ");");
             pst.setString(1, nick);
             pst.setString(2, admin);
-            if(reason != null) {
+            if (reason != null) {
                 pst.setString(3, reason);
             } else {
                 pst.setNull(3, Types.VARCHAR);
             }
-            if(until != null) {
+            if (until != null) {
                 pst.setTimestamp(4, new Timestamp(until));
             } else {
                 pst.setTimestamp(4, new Timestamp(100000));
             }
             pst.executeUpdate();
-        } catch(SQLException ex) {
+        } catch (SQLException ex) {
             ConsoleLogger.info(ex.getMessage());
+        } finally {
+            if (pst != null) {
+                try {
+                    pst.close();
+                } catch (SQLException ex) {
+                }
+            }
         }
     }
 
@@ -123,8 +142,15 @@ public abstract class SQLDataSource implements DataSource {
                     + "player_id=(SELECT player_id FROM player WHERE player=?);");
             pst.setString(1, nick);
             pst.executeUpdate();
-        } catch(SQLException ex) {
+        } catch (SQLException ex) {
             ConsoleLogger.info(ex.getMessage());
+        } finally {
+            if (pst != null) {
+                try {
+                    pst.close();
+                } catch (SQLException ex) {
+                }
+            }
         }
     }
 
@@ -134,20 +160,27 @@ public abstract class SQLDataSource implements DataSource {
         PreparedStatement pst = null;
         try {
             pst = con.prepareStatement("INSERT INTO subnet_ban (subnet,admin,reason) VALUES("
-                                       + "?,"
-                                       + "?,"
-                                       + "?"
-                                       + ");");
+                    + "?,"
+                    + "?,"
+                    + "?"
+                    + ");");
             pst.setString(1, subnet.toString());
             pst.setString(2, admin);
-            if(reason != null) {
+            if (reason != null) {
                 pst.setString(3, reason);
             } else {
                 pst.setNull(3, Types.VARCHAR);
             }
             pst.executeUpdate();
-        } catch(SQLException ex) {
+        } catch (SQLException ex) {
             ConsoleLogger.info(ex.getMessage());
+        } finally {
+            if (pst != null) {
+                try {
+                    pst.close();
+                } catch (SQLException ex) {
+                }
+            }
         }
     }
 
@@ -159,8 +192,15 @@ public abstract class SQLDataSource implements DataSource {
                     "DELETE FROM subnet_ban WHERE subnet=?;");
             pst.setString(1, subnet.toString());
             pst.executeUpdate();
-        } catch(SQLException ex) {
+        } catch (SQLException ex) {
             ConsoleLogger.info(ex.getMessage());
+        } finally {
+            if (pst != null) {
+                try {
+                    pst.close();
+                } catch (SQLException ex) {
+                }
+            }
         }
     }
 
@@ -172,8 +212,15 @@ public abstract class SQLDataSource implements DataSource {
                     "INSERT INTO country_ban (country) VALUES(?);");
             pst.setString(1, code);
             pst.executeUpdate();
-        } catch(SQLException ex) {
+        } catch (SQLException ex) {
             ConsoleLogger.info(ex.getMessage());
+        } finally {
+            if (pst != null) {
+                try {
+                    pst.close();
+                } catch (SQLException ex) {
+                }
+            }
         }
     }
 
@@ -185,8 +232,15 @@ public abstract class SQLDataSource implements DataSource {
                     "DELETE FROM country_ban WHERE country=?;");
             pst.setString(1, code);
             pst.executeUpdate();
-        } catch(SQLException ex) {
+        } catch (SQLException ex) {
             ConsoleLogger.info(ex.getMessage());
+        } finally {
+            if (pst != null) {
+                try {
+                    pst.close();
+                } catch (SQLException ex) {
+                }
+            }
         }
     }
 
@@ -196,12 +250,19 @@ public abstract class SQLDataSource implements DataSource {
         try {
             createNick(nick);
             pst = con.prepareStatement("INSERT INTO whitelist (player_id) VALUES("
-                                       + "SELECT player_id FROM player WHERE player=?"
-                                       + ");");
+                    + "SELECT player_id FROM player WHERE player=?"
+                    + ");");
             pst.setString(1, nick);
             pst.executeUpdate();
-        } catch(SQLException ex) {
+        } catch (SQLException ex) {
             ConsoleLogger.info(ex.getMessage());
+        } finally {
+            if (pst != null) {
+                try {
+                    pst.close();
+                } catch (SQLException ex) {
+                }
+            }
         }
     }
 
@@ -214,8 +275,15 @@ public abstract class SQLDataSource implements DataSource {
                     + "WHERE player_id=(SELECT player_id FROM player WHERE player=?);");
             pst.setString(1, nick);
             pst.executeUpdate();
-        } catch(SQLException ex) {
+        } catch (SQLException ex) {
             ConsoleLogger.info(ex.getMessage());
+        } finally {
+            if (pst != null) {
+                try {
+                    pst.close();
+                } catch (SQLException ex) {
+                }
+            }
         }
     }
 
@@ -228,9 +296,16 @@ public abstract class SQLDataSource implements DataSource {
                     + "WHERE player_id IN (SELECT player_id FROM player_ban) AND ip=?;");
             pst.setString(1, ip);
             return pst.executeQuery().next();
-        } catch(SQLException ex) {
+        } catch (SQLException ex) {
             ConsoleLogger.info(ex.getMessage());
             return false;
+        } finally {
+            if (pst != null) {
+                try {
+                    pst.close();
+                } catch (SQLException ex) {
+                }
+            }
         }
     }
 
@@ -240,19 +315,26 @@ public abstract class SQLDataSource implements DataSource {
         try {
             st = con.createStatement();
             ResultSet rs = st.executeQuery("SELECT subnet FROM subnet_ban;");
-            while(rs.next()) {
+            while (rs.next()) {
                 try {
                     Subnet sub = new Subnet(rs.getString(1));
-                    if(sub.isIpInSubnet(InetAddress.getByName(ip))) {
+                    if (sub.isIpInSubnet(InetAddress.getByName(ip))) {
                         return true;
                     }
-                } catch(UnknownHostException ex) {
+                } catch (UnknownHostException ex) {
                 }
             }
             return false;
-        } catch(SQLException ex) {
+        } catch (SQLException ex) {
             ConsoleLogger.info(ex.getMessage());
             return false;
+        } finally {
+            if (st != null) {
+                try {
+                    st.close();
+                } catch (SQLException ex) {
+                }
+            }
         }
     }
 
@@ -265,9 +347,16 @@ public abstract class SQLDataSource implements DataSource {
                     + "WHERE player_id=(SELECT player_id FROM player WHERE player=?);");
             pst.setString(1, nick);
             return pst.executeQuery().next();
-        } catch(SQLException ex) {
+        } catch (SQLException ex) {
             ConsoleLogger.info(ex.getMessage());
             return false;
+        } finally {
+            if (pst != null) {
+                try {
+                    pst.close();
+                } catch (SQLException ex) {
+                }
+            }
         }
     }
 
@@ -279,9 +368,16 @@ public abstract class SQLDataSource implements DataSource {
                     "SELECT country FROM country_ban WHERE country=?;");
             pst.setString(1, code);
             return pst.executeQuery().next();
-        } catch(SQLException ex) {
+        } catch (SQLException ex) {
             ConsoleLogger.info(ex.getMessage());
             return false;
+        } finally {
+            if (pst != null) {
+                try {
+                    pst.close();
+                } catch (SQLException ex) {
+                }
+            }
         }
     }
 
@@ -294,9 +390,16 @@ public abstract class SQLDataSource implements DataSource {
                     + "WHERE player_id=(SELECT player_id FROM player WHERE player=?);");
             pst.setString(1, nick);
             return pst.executeQuery().next();
-        } catch(SQLException ex) {
+        } catch (SQLException ex) {
             ConsoleLogger.info(ex.getMessage());
             return false;
+        } finally {
+            if (pst != null) {
+                try {
+                    pst.close();
+                } catch (SQLException ex) {
+                }
+            }
         }
     }
 
@@ -310,11 +413,18 @@ public abstract class SQLDataSource implements DataSource {
                     + "WHERE player_id=(SELECT player_id FROM player WHERE player=?);");
             pst.setString(1, nick);
             ResultSet rs = pst.executeQuery();
-            while(rs.next()) {
+            while (rs.next()) {
                 list.add(rs.getString(1));
             }
-        } catch(SQLException ex) {
+        } catch (SQLException ex) {
             ConsoleLogger.info(ex.getMessage());
+        } finally {
+            if (pst != null) {
+                try {
+                    pst.close();
+                } catch (SQLException ex) {
+                }
+            }
         }
 
         return list.toArray(new String[0]);
@@ -329,11 +439,18 @@ public abstract class SQLDataSource implements DataSource {
             ResultSet rs = st.executeQuery(
                     "SELECT player FROM player "
                     + "WHERE player_id IN (SELECT player_id FROM player_ban);");
-            while(rs.next()) {
+            while (rs.next()) {
                 list.add(rs.getString(1));
             }
-        } catch(SQLException ex) {
+        } catch (SQLException ex) {
             ConsoleLogger.info(ex.getMessage());
+        } finally {
+            if (st != null) {
+                try {
+                    st.close();
+                } catch (SQLException ex) {
+                }
+            }
         }
 
         return list.toArray(new String[0]);
@@ -346,11 +463,18 @@ public abstract class SQLDataSource implements DataSource {
         try {
             st = con.createStatement();
             ResultSet rs = st.executeQuery("SELECT subnet FROM subnet_ban;");
-            while(rs.next()) {
+            while (rs.next()) {
                 list.add(rs.getString(1));
             }
-        } catch(SQLException ex) {
+        } catch (SQLException ex) {
             ConsoleLogger.info(ex.getMessage());
+        } finally {
+            if (st != null) {
+                try {
+                    st.close();
+                } catch (SQLException ex) {
+                }
+            }
         }
 
         return list.toArray(new String[0]);
@@ -363,11 +487,18 @@ public abstract class SQLDataSource implements DataSource {
         try {
             st = con.createStatement();
             ResultSet rs = st.executeQuery("SELECT country FROM country_ban;");
-            while(rs.next()) {
+            while (rs.next()) {
                 list.add(rs.getString(1));
             }
-        } catch(SQLException ex) {
+        } catch (SQLException ex) {
             ConsoleLogger.info(ex.getMessage());
+        } finally {
+            if (st != null) {
+                try {
+                    st.close();
+                } catch (SQLException ex) {
+                }
+            }
         }
 
         return list.toArray(new String[0]);
@@ -382,11 +513,18 @@ public abstract class SQLDataSource implements DataSource {
             ResultSet rs = st.executeQuery(
                     "SELECT player FROM player "
                     + "WHERE player_id IN (SELECT player_id FROM whitelist);");
-            while(rs.next()) {
+            while (rs.next()) {
                 list.add(rs.getString(1));
             }
-        } catch(SQLException ex) {
+        } catch (SQLException ex) {
             ConsoleLogger.info(ex.getMessage());
+        } finally {
+            if (st != null) {
+                try {
+                    st.close();
+                } catch (SQLException ex) {
+                }
+            }
         }
 
         return list.toArray(new String[0]);
@@ -402,11 +540,18 @@ public abstract class SQLDataSource implements DataSource {
                     + "WHERE player_id IN (SELECT player_id FROM ip WHERE ip=?);");
             pst.setString(1, ip);
             ResultSet rs = pst.executeQuery();
-            while(rs.next()) {
+            while (rs.next()) {
                 list.add(rs.getString(1));
             }
-        } catch(SQLException ex) {
+        } catch (SQLException ex) {
             ConsoleLogger.info(ex.getMessage());
+        } finally {
+            if (pst != null) {
+                try {
+                    pst.close();
+                } catch (SQLException ex) {
+                }
+            }
         }
 
         return list.toArray(new String[0]);
@@ -422,12 +567,21 @@ public abstract class SQLDataSource implements DataSource {
                     "SELECT player,until FROM player_ban "
                     + "JOIN player ON player_ban.player_id=player.player_id "
                     + "WHERE until IS NOT NULL;");
-            while(rs.next()) {
-                if(rs.getTimestamp(2).getTime() == 100000) continue;
+            while (rs.next()) {
+                if (rs.getTimestamp(2).getTime() == 100000) {
+                    continue;
+                }
                 map.put(rs.getString(1), rs.getTimestamp(2).getTime());
             }
-        } catch(SQLException ex) {
+        } catch (SQLException ex) {
             ConsoleLogger.info(ex.getMessage());
+        } finally {
+            if (st != null) {
+                try {
+                    st.close();
+                } catch (SQLException ex) {
+                }
+            }
         }
 
         return map;
@@ -443,18 +597,25 @@ public abstract class SQLDataSource implements DataSource {
                     + "WHERE player_id=(SELECT player_id FROM player WHERE player=?);");
             pst.setString(1, nick);
             ResultSet rs = pst.executeQuery();
-            while(rs.next()) {
+            while (rs.next()) {
                 map.put("admin", rs.getString(1));
-                if(rs.getString(2) != null) {
+                if (rs.getString(2) != null) {
                     map.put("reason", rs.getString(2));
                 }
-                if(rs.getTimestamp(3) != null) {
+                if (rs.getTimestamp(3) != null) {
                     map.put("until",
                             String.valueOf(rs.getTimestamp(3).getTime()));
                 }
             }
-        } catch(SQLException ex) {
+        } catch (SQLException ex) {
             ConsoleLogger.info(ex.getMessage());
+        } finally {
+            if (pst != null) {
+                try {
+                    pst.close();
+                } catch (SQLException ex) {
+                }
+            }
         }
 
         return map;
@@ -469,14 +630,21 @@ public abstract class SQLDataSource implements DataSource {
                     "SELECT admin,reason FROM subnet_ban WHERE subnet=?;");
             pst.setString(1, subnet.toString());
             ResultSet rs = pst.executeQuery();
-            while(rs.next()) {
+            while (rs.next()) {
                 map.put("admin", rs.getString(1));
-                if(rs.getString(2) != null) {
+                if (rs.getString(2) != null) {
                     map.put("reason", rs.getString(2));
                 }
             }
-        } catch(SQLException ex) {
+        } catch (SQLException ex) {
             ConsoleLogger.info(ex.getMessage());
+        } finally {
+            if (pst != null) {
+                try {
+                    pst.close();
+                } catch (SQLException ex) {
+                }
+            }
         }
 
         return map;
