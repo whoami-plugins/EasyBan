@@ -1,6 +1,10 @@
 name: EasyBan
 main: uk.org.whoami.easyban.EasyBan
-version: 1.7
+version: 1.8
+description: 'Ban people/subnets/countries from "offline" Servers'
+author: whoami
+website: 'http://dev.bukkit.org/server-mods/easyban/'
+softdepend: [GeoIPTools]
 commands:
     ekick:
         description: Kick player

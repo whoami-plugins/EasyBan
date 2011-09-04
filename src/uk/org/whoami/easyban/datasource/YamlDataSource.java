@@ -19,6 +19,7 @@ import java.io.File;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -85,7 +86,7 @@ public class YamlDataSource extends Configuration implements DataSource {
 
     @Override
     public synchronized void banNick(String nick, String admin, String reason,
-            Long until) {
+            Calendar until) {
         if(!bans.containsKey(nick)) {
             HashMap<String, String> tmp = new HashMap<String, String>();
             tmp.put("admin", admin);
@@ -93,7 +94,7 @@ public class YamlDataSource extends Configuration implements DataSource {
                 tmp.put("reason", reason);
             }
             if(until != null) {
-                tmp.put("until", until.toString());
+                tmp.put("until", String.valueOf(until.getTimeInMillis()));
             }
             bans.put(nick, tmp);
             save();

@@ -62,6 +62,7 @@ public class EasyBan extends JavaPlugin {
     public void onDisable() {
         this.getServer().getScheduler().cancelTasks(this);
         database.close();
+        ConsoleLogger.info("EasyBan disabled; Version: " + this.getDescription().getVersion());
     }
 
     @Override
@@ -133,10 +134,22 @@ public class EasyBan extends JavaPlugin {
             if (args.length == 0 || !perm) {
                 return true;
             }
+
             Player player = this.getServer().getPlayer(args[0]);
             if (player != null) {
-                this.getServer().broadcastMessage(ChatColor.RED + player.getDisplayName() + m._(" has been kicked"));
-                player.kickPlayer(m._("You have been kicked"));
+                String name = player.getDisplayName();
+
+                if (args.length == 1) {
+                    player.kickPlayer(m._("You have been kicked"));
+                } else {
+                    String msg = "";
+                    for (int i = 1; i < args.length; i++) {
+                        msg += args[i] + " ";
+                    }
+                    player.kickPlayer(m._("You have been kicked") + " " + m._("Reason: ") + msg);
+                }
+
+                this.getServer().broadcastMessage(ChatColor.RED + name + m._(" has been kicked"));
                 ConsoleLogger.info(player.getName() + " has been kicked by "
                         + admin);
             }
@@ -178,53 +191,46 @@ public class EasyBan extends JavaPlugin {
             }
             String playerNick = args[0];
             Player player = this.getServer().getPlayer(playerNick);
+            String reason = null;
+            Calendar until = null;
 
             if (player != null) {
                 playerNick = player.getName();
             }
 
-            if (args.length == 1) {
-                database.banNick(playerNick, admin, null, null);
-                if (player != null) {
-                    player.kickPlayer(m._("You have been banned"));
-                }
-                ConsoleLogger.info(playerNick + " has been banned by " + admin);
-            } else {
+            if (args.length > 1) {
                 int to = args.length - 1;
-                Integer min = null;
-                try {
-                    min = Integer.parseInt(args[args.length - 1]);
-                } catch (NumberFormatException ex) {
+                if (Subnet.isParseableInteger(args[args.length - 1])) {
+                    until = Calendar.getInstance();
+                    int min = Integer.parseInt(args[args.length - 1]);
+                    until.add(Calendar.MINUTE, min);
+                } else {
                     to = args.length;
                 }
-
-                String reason = "";
+                
+                String tmp = "";
                 for (int i = 1; i < to; i++) {
-                    reason += args[i] + " ";
+                    tmp += args[i] + " ";
                 }
-                if (reason.equals("")) {
-                    reason = null;
-                }
-
-                if (min == null) {
-                    database.banNick(playerNick, admin, reason, null);
-                    if (player != null) {
-                        player.kickPlayer(m._("You have been banned"));
-                    }
-                    ConsoleLogger.info(playerNick + " has been banned by "
-                            + admin);
-                } else {
-                    Calendar cal = Calendar.getInstance();
-                    cal.add(Calendar.MINUTE, min);
-                    database.banNick(playerNick, admin, reason, cal.getTimeInMillis());
-                    if (player != null) {
-                        player.kickPlayer("You are banned until: " + DateFormat.getDateTimeInstance().format(cal.getTime()));
-                    }
-                    ConsoleLogger.info("Temporary ban for " + playerNick);
+                if (tmp.length() > 0) {
+                    reason = tmp;
                 }
             }
-            this.getServer().broadcastMessage(ChatColor.RED + playerNick
-                    + m._(" has been banned"));
+
+            if (player != null) {
+                String kickmsg = m._("You have been banned by ") + admin;
+                if (reason != null) {
+                    kickmsg += " " + m._("Reason: ") + reason;
+                }
+                if (until != null) {
+                    kickmsg += " " + m._("Until: ") + DateFormat.getDateTimeInstance().format(until.getTime());
+                }
+                player.kickPlayer(kickmsg);
+            }
+            database.banNick(playerNick, admin, reason, until);
+            this.getServer().broadcastMessage(playerNick + m._(" has been banned"));
+            ConsoleLogger.info(playerNick + " has been banned by " + admin);
+
             return true;
         }
 

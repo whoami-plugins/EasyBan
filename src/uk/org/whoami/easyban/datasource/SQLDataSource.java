@@ -24,6 +24,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import org.hsqldb.types.Types;
 import uk.org.whoami.easyban.ConsoleLogger;
@@ -98,7 +99,7 @@ public abstract class SQLDataSource implements DataSource {
 
     @Override
     public synchronized void banNick(String nick, String admin, String reason,
-            Long until) {
+            Calendar until) {
         PreparedStatement pst = null;
         try {
             createNick(nick);
@@ -116,7 +117,7 @@ public abstract class SQLDataSource implements DataSource {
                 pst.setNull(3, Types.VARCHAR);
             }
             if (until != null) {
-                pst.setTimestamp(4, new Timestamp(until));
+                pst.setTimestamp(4, new Timestamp(until.getTimeInMillis()));
             } else {
                 pst.setTimestamp(4, new Timestamp(100000));
             }

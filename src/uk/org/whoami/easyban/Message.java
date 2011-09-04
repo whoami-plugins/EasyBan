@@ -60,6 +60,7 @@ public class Message extends Configuration {
         map.put("Alternative nicks of ", "Alternative nicks of ");
         map.put("Your subnet is banned", "Your subnet is banned");
         map.put("Users who connected from IP", "Users who connected from IP");
+        map.put("You have been banned by ","You have been banned by ");
     }
 
     public String _(String message) {

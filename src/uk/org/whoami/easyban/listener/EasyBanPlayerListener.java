@@ -15,6 +15,9 @@
  */
 package uk.org.whoami.easyban.listener;
 
+import java.text.DateFormat;
+import java.util.Date;
+import java.util.HashMap;
 import uk.org.whoami.easyban.datasource.DataSource;
 import org.bukkit.event.player.PlayerListener;
 import org.bukkit.event.player.PlayerLoginEvent;
@@ -31,30 +34,51 @@ public class EasyBanPlayerListener extends PlayerListener {
         this.database = database;
         this.msg = Message.getInstance();
     }
-    
+
     @Override
     public void onPlayerLogin(PlayerLoginEvent event) {
-        if(event.getPlayer() == null || !event.getResult().equals(Result.ALLOWED)) {
+        if (event.getPlayer() == null || !event.getResult().equals(Result.ALLOWED)) {
             return;
         }
-        
+
         String name = event.getPlayer().getName();
         String ip = event.getKickMessage();
 
         database.addIpToHistory(name, ip);
 
-        if (database.isNickBanned(name) || database.isIpBanned(ip)) {
-            event.disallow(Result.KICK_BANNED, msg._("You are banned"));
+        if (database.isNickBanned(name)) {
+            HashMap<String, String> banInfo = database.getBanInformation(name);
+            String kickmsg = msg._("You have been banned by ") + banInfo.get("admin");
+            
+            if(banInfo.containsKey("reason")) {
+                kickmsg += " " + msg._("Reason: ") + banInfo.get("reason");
+            }
+            
+            if(banInfo.containsKey("until")) {
+                Long unixTime = Long.parseLong(banInfo.get("until"));                
+                kickmsg += " " + msg._("Until: ") + DateFormat.getDateTimeInstance().format(new Date(unixTime));
+            }
+            
+            event.disallow(Result.KICK_BANNED, kickmsg);
             ConsoleLogger.info("Ban for " + name + " detected");
-        }
-
-        if(database.isNickWhitelisted(event.getPlayer().getName())) {
             return;
         }
 
-        if(database.isSubnetBanned(ip)) {
+
+        if (database.isIpBanned(ip)) {
+            event.disallow(Result.KICK_BANNED, msg._("You are banned"));
+            ConsoleLogger.info("IP Ban for " + name + " detected");
+            return;
+        }
+
+        if (database.isNickWhitelisted(event.getPlayer().getName())) {
+            ConsoleLogger.info("Whitelist entry for " + name + " found");
+            return;
+        }
+
+        if (database.isSubnetBanned(ip)) {
             event.disallow(Result.KICK_BANNED, msg._("Your subnet is banned"));
-            ConsoleLogger.info("Subnet ban for " + name + "/"+ ip +" detected");
+            ConsoleLogger.info("Subnet ban for " + name + "/" + ip + " detected");
         }
     }
 }
