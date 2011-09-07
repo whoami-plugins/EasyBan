@@ -19,6 +19,7 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 import uk.org.whoami.easyban.ConsoleLogger;
+import uk.org.whoami.easyban.settings.Settings;
 
 /**
  *
@@ -26,19 +27,18 @@ import uk.org.whoami.easyban.ConsoleLogger;
  */
 public class MySQLDataSource extends SQLDataSource {
 
-    private String schema;
+    private String databaseName;
     private String host;
     private String port;
     private String username;
     private String password;
 
-    public MySQLDataSource(String schema, String host, String port, String username,
-            String password) throws ClassNotFoundException, SQLException {
-        this.schema = schema;
-        this.host = host;
-        this.port = port;
-        this.username = username;
-        this.password = password;
+    public MySQLDataSource(Settings settings) throws ClassNotFoundException, SQLException {
+        this.databaseName = settings.getMySQLDatabaseName();
+        this.host = settings.getMySQLHost();
+        this.port = settings.getMySQLPort();
+        this.username = settings.getMySQLUsername();
+        this.password = settings.getMySQLPassword();
         connect();
         setup();
         ConsoleLogger.info("Database setup finished");
@@ -50,7 +50,7 @@ public class MySQLDataSource extends SQLDataSource {
         Class.forName("com.mysql.jdbc.Driver");
         ConsoleLogger.info("MySQL driver loaded");
         con = DriverManager.getConnection("jdbc:mysql://" + host + ":" + port
-                + "/" + schema, username, password);
+                + "/" + databaseName, username, password);
         ConsoleLogger.info("Connected to Database");
     }
 

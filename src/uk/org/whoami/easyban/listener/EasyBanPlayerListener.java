@@ -25,7 +25,7 @@ import org.bukkit.event.player.PlayerListener;
 import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.event.player.PlayerLoginEvent.Result;
 import uk.org.whoami.easyban.ConsoleLogger;
-import uk.org.whoami.easyban.Message;
+import uk.org.whoami.easyban.settings.Message;
 
 public class EasyBanPlayerListener extends PlayerListener {
 

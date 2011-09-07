@@ -4,7 +4,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import uk.org.whoami.easyban.Message;
+import uk.org.whoami.easyban.settings.Message;
 import uk.org.whoami.easyban.permission.Permission;
 
 

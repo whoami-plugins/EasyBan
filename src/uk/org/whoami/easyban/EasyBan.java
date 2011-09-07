@@ -15,6 +15,7 @@
  */
 package uk.org.whoami.easyban;
 
+import uk.org.whoami.easyban.settings.Message;
 import uk.org.whoami.easyban.listener.EasyBanPlayerListener;
 import uk.org.whoami.easyban.tasks.UnbanTask;
 import uk.org.whoami.easyban.datasource.DataSource;
@@ -43,6 +44,7 @@ import uk.org.whoami.easyban.commands.WhitelistCommand;
 import uk.org.whoami.easyban.datasource.HSQLDataSource;
 import uk.org.whoami.easyban.datasource.MySQLDataSource;
 import uk.org.whoami.easyban.listener.EasyBanCountryListener;
+import uk.org.whoami.easyban.settings.Settings;
 import uk.org.whoami.geoip.GeoIPLookup;
 import uk.org.whoami.geoip.GeoIPTools;
 
@@ -51,13 +53,7 @@ public class EasyBan extends JavaPlugin {
     private DataSource database;
     private final File data = new File(this.getDataFolder(), "plugins/EasyBan/");
     private Message m;
-
-    private void initConfig() {
-        if (this.getConfiguration().getProperty("database") == null) {
-            this.getConfiguration().setProperty("database", "yaml");
-            this.getConfiguration().save();
-        }
-    }
+    private Settings settings;
 
     @Override
     public void onDisable() {
@@ -68,30 +64,27 @@ public class EasyBan extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        initConfig();
+        settings = Settings.getInstance();
         if (!data.exists()) {
             data.mkdirs();
         }
         m = Message.getInstance(data);
         m.updateMessages(this.getConfiguration());
-
-        if (this.getConfiguration().getProperty("database").equals("yaml")) {
+        
+        String db = settings.getDatabase();
+        
+        if (db.equals("yaml")) {
             database = new YamlDataSource(this);
-        } else if (this.getConfiguration().getProperty("database").equals("hsql")) {
+        } else if (db.equals("hsql")) {
             try {
                 database = new HSQLDataSource(this);
             } catch (Exception ex) {
                 ConsoleLogger.info(ex.getMessage());
                 ConsoleLogger.info("Can't load database");
             }
-        } else if (this.getConfiguration().getProperty("database").equals("mysql")) {
-            String schema = this.getConfiguration().getString("schema", "easyban");
-            String host = this.getConfiguration().getString("host");
-            String port = this.getConfiguration().getString("port");
-            String user = this.getConfiguration().getString("username");
-            String password = this.getConfiguration().getString("password");
+        } else if (db.equals("mysql")) {
             try {
-                database = new MySQLDataSource(schema, host, port, user, password);
+                database = new MySQLDataSource(settings);
             } catch (Exception ex) {
                 ConsoleLogger.info(ex.getMessage());
                 ConsoleLogger.info("Can't load database");
