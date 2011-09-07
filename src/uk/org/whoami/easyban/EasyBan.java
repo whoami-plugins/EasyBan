@@ -102,9 +102,11 @@ public class EasyBan extends JavaPlugin {
             return;
         }
 
+        EasyBanPlayerListener l = new EasyBanPlayerListener(database);
         this.getServer().getPluginManager().registerEvent(Event.Type.PLAYER_LOGIN,
-                new EasyBanPlayerListener(database),
-                Event.Priority.Lowest, this);
+                l, Event.Priority.Lowest, this);
+        this.getServer().getPluginManager().registerEvent(Event.Type.PLAYER_JOIN, 
+                l, Event.Priority.Lowest, this);
 
         GeoIPLookup geo = getGeoIPLookup();
         if (geo != null) {
