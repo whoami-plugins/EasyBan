@@ -15,12 +15,6 @@
  */
 package uk.org.whoami.easyban;
 
-import uk.org.whoami.easyban.settings.Message;
-import uk.org.whoami.easyban.listener.EasyBanPlayerListener;
-import uk.org.whoami.easyban.tasks.UnbanTask;
-import uk.org.whoami.easyban.datasource.DataSource;
-import uk.org.whoami.easyban.datasource.YamlDataSource;
-import java.io.File;
 import org.bukkit.event.Event;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -41,18 +35,20 @@ import uk.org.whoami.easyban.commands.UnbanCountryCommand;
 import uk.org.whoami.easyban.commands.UnbanSubnetCommand;
 import uk.org.whoami.easyban.commands.UnwhitelistCommand;
 import uk.org.whoami.easyban.commands.WhitelistCommand;
+import uk.org.whoami.easyban.datasource.DataSource;
 import uk.org.whoami.easyban.datasource.HSQLDataSource;
 import uk.org.whoami.easyban.datasource.MySQLDataSource;
+import uk.org.whoami.easyban.datasource.YamlDataSource;
 import uk.org.whoami.easyban.listener.EasyBanCountryListener;
+import uk.org.whoami.easyban.listener.EasyBanPlayerListener;
 import uk.org.whoami.easyban.settings.Settings;
+import uk.org.whoami.easyban.tasks.UnbanTask;
 import uk.org.whoami.geoip.GeoIPLookup;
 import uk.org.whoami.geoip.GeoIPTools;
 
 public class EasyBan extends JavaPlugin {
 
     private DataSource database;
-    private final File data = new File(this.getDataFolder(), "plugins/EasyBan/");
-    private Message m;
     private Settings settings;
 
     @Override
@@ -65,22 +61,18 @@ public class EasyBan extends JavaPlugin {
     @Override
     public void onEnable() {
         settings = Settings.getInstance();
-        if (!data.exists()) {
-            data.mkdirs();
-        }
-        m = Message.getInstance(data);
-        m.updateMessages(this.getConfiguration());
-        
         String db = settings.getDatabase();
-        
+
         if (db.equals("yaml")) {
-            database = new YamlDataSource(this);
+            database = new YamlDataSource();
         } else if (db.equals("hsql")) {
             try {
                 database = new HSQLDataSource(this);
             } catch (Exception ex) {
                 ConsoleLogger.info(ex.getMessage());
                 ConsoleLogger.info("Can't load database");
+                this.getServer().getPluginManager().disablePlugin(this);
+                return;
             }
         } else if (db.equals("mysql")) {
             try {
@@ -88,6 +80,8 @@ public class EasyBan extends JavaPlugin {
             } catch (Exception ex) {
                 ConsoleLogger.info(ex.getMessage());
                 ConsoleLogger.info("Can't load database");
+                this.getServer().getPluginManager().disablePlugin(this);
+                return;
             }
         } else {
             ConsoleLogger.info("Unsupported database");
@@ -98,7 +92,7 @@ public class EasyBan extends JavaPlugin {
         EasyBanPlayerListener l = new EasyBanPlayerListener(database);
         this.getServer().getPluginManager().registerEvent(Event.Type.PLAYER_LOGIN,
                 l, Event.Priority.Lowest, this);
-        this.getServer().getPluginManager().registerEvent(Event.Type.PLAYER_JOIN, 
+        this.getServer().getPluginManager().registerEvent(Event.Type.PLAYER_JOIN,
                 l, Event.Priority.Lowest, this);
 
         GeoIPLookup geo = getGeoIPLookup();
@@ -111,7 +105,7 @@ public class EasyBan extends JavaPlugin {
 
         this.getServer().getScheduler().scheduleAsyncRepeatingTask(this,
                 new UnbanTask(database), 60L, 1200L);
-        
+
         this.getCommand("ekick").setExecutor(new KickCommand());
         this.getCommand("eban").setExecutor(new BanCommand(database));
         this.getCommand("eunban").setExecutor(new UnbanCommand(database));
@@ -129,7 +123,7 @@ public class EasyBan extends JavaPlugin {
         this.getCommand("ewhitelist").setExecutor(new WhitelistCommand(database));
         this.getCommand("eunwhitelist").setExecutor(new UnwhitelistCommand(database));
         this.getCommand("elistwhite").setExecutor(new ListWhitelistCommand(database));
-        
+
         ConsoleLogger.info("EasyBan enabled; Version: " + this.getDescription().
                 getVersion());
     }

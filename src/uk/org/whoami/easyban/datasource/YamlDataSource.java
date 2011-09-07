@@ -24,8 +24,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
-import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.util.config.Configuration;
+import uk.org.whoami.easyban.settings.Settings;
 import uk.org.whoami.easyban.util.Subnet;
 
 public class YamlDataSource extends Configuration implements DataSource {
@@ -42,8 +42,8 @@ public class YamlDataSource extends Configuration implements DataSource {
     private ArrayList<String> whitelist;
 
     @SuppressWarnings("unchecked")
-    public YamlDataSource(JavaPlugin plugin) {
-        super(new File(plugin.getDataFolder(), "bans.yml"));
+    public YamlDataSource() {
+        super(new File(Settings.DATABASE_FILE));
         load();
         if(getProperty(banPath) == null) {
             setProperty(banPath,

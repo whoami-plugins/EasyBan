@@ -24,8 +24,8 @@ public class Message extends Configuration {
     private static Message singleton = null;
     private final HashMap<String, String> map = new HashMap<String, String>();
 
-    private Message(File folder) {
-        super(new File(folder, "messages.yml"));
+    private Message() {
+        super(new File(Settings.MESSAGE_FILE));
         loadDefaults();
         getMessages();
     }
@@ -71,24 +71,6 @@ public class Message extends Configuration {
         return ret;
     }
 
-    public void updateMessages(Configuration conf) {
-        for(String key : conf.getKeys()) {
-            if(key.equals("database") || key.equals("maxmind") || key.equals(
-                    "maxmindv6") || key.equals("host") || key.equals("port")
-               || key.equals("username") || key.equals("password") || key.equals("schema")) {
-                continue;
-            }
-
-            if(map.containsKey(key)) {
-                map.put(key, conf.getString(key));
-                this.setProperty(key, map.get(key));
-            }
-            conf.removeProperty(key);
-            conf.save();
-        }
-        this.save();
-    }
-
     private void getMessages() {
         this.load();
         for(String key : map.keySet()) {
@@ -101,14 +83,10 @@ public class Message extends Configuration {
         this.save();
     }
 
-    public static Message getInstance(File folder) {
-        if(singleton == null) {
-            singleton = new Message(folder);
-        }
-        return singleton;
-    }
-
     public static Message getInstance() {
+        if(singleton == null) {
+            singleton = new Message();
+        }
         return singleton;
     }
 }

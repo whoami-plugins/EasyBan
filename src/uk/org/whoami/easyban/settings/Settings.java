@@ -8,6 +8,7 @@ public final class Settings extends Configuration {
     public static final String PLUGIN_FOLDER = "./plugins/EasyBan";
     public static final String MESSAGE_FILE = Settings.PLUGIN_FOLDER + "/messages.yml";
     public static final String SETTINGS_FILE = Settings.PLUGIN_FOLDER + "/config.yml";
+    public static final String DATABASE_FILE = Settings.PLUGIN_FOLDER + "/bans.yml";
     
     private static Settings singleton;
     
