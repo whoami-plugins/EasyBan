@@ -20,7 +20,7 @@ public class Permission {
             }
         }
         
-        if (!(sender instanceof Player) && handler != null) {
+        if ((sender instanceof Player) && handler != null) {
             perm = handler.has((Player) sender, "easyban." + cmd.toLowerCase());
         }
 
