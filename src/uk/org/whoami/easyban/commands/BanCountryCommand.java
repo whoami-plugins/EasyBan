@@ -19,6 +19,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import uk.org.whoami.easyban.ConsoleLogger;
 import uk.org.whoami.easyban.datasource.DataSource;
+import uk.org.whoami.easyban.settings.Settings;
 
 public class BanCountryCommand extends EasyBanCommand {
 
@@ -34,8 +35,12 @@ public class BanCountryCommand extends EasyBanCommand {
             return;
         }
         database.banCountry(args[0]);
-        cs.getServer().broadcastMessage(m._("A country has been banned: ")
-                + args[0]);
+
+        Settings settings = Settings.getInstance();
+        if (settings.isCountryBanPublic()) {
+            cs.getServer().broadcastMessage(m._("A country has been banned: ")
+                    + args[0]);
+        }
         ConsoleLogger.info(admin + " banned the country " + args[0]);
     }
 }

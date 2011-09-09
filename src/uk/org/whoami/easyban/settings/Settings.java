@@ -35,6 +35,7 @@ public final class Settings extends Configuration {
     public void reload() {
         load();
         write();
+        save();
     }
     
     private void write() {
@@ -44,6 +45,16 @@ public final class Settings extends Configuration {
         getMySQLPort();
         getMySQLUsername();
         getMySQLPassword();
+        isKickPublic();
+        isKickReasonPublic();
+        isBanPublic();
+        isBanReasonPublic();
+        isBanUntilPublic();
+        isSubnetBanPublic();
+        isSubnetBanReasonPublic();
+        isCountryBanPublic();
+        isAppendCustomKickMessageEnabled();
+        isAppendCustomBanMessageEnabled();
     }
 
     public String getDatabase() {
@@ -119,8 +130,96 @@ public final class Settings extends Configuration {
         return getString(key);
     }
     
+    public boolean isKickPublic() {
+        String key = "settings.message.kick.public";
+        if(getString(key) == null) {
+            setProperty(key, true);
+        }
+        return getBoolean(key, true);
+    }
+    
+    public boolean isKickReasonPublic() {
+        String key = "settings.message.kick.publicReason";
+        if(getString(key) == null) {
+            setProperty(key, true);
+        }
+        return getBoolean(key, true);
+    }
+    
+    public boolean isAppendCustomKickMessageEnabled() {
+        String key = "settings.message.kick.appendCustomMessage";
+        if(getString(key) == null) {
+            setProperty(key, false);
+        }
+        return getBoolean(key, false);
+    }
+    
+    public boolean isBanPublic() {
+        String key = "settings.message.ban.public";
+        if(getString(key) == null) {
+            setProperty(key, true);
+        }
+        return getBoolean(key, true);
+    }
+    
+    public boolean isBanReasonPublic() {
+        String key = "settings.message.ban.publicReason";
+        if(getString(key) == null) {
+            setProperty(key, true);
+        }
+        return getBoolean(key, true);
+    }
+    
+    public boolean isBanUntilPublic() {
+        String key = "settings.message.ban.publicUntil";
+        if(getString(key) == null) {
+            setProperty(key, true);
+        }
+        return getBoolean(key, true);
+    }
+    
+    public boolean isAppendCustomBanMessageEnabled() {
+        String key = "settings.message.ban.appendCustomMessage";
+        if(getString(key) == null) {
+            setProperty(key, false);
+        }
+        return getBoolean(key, false);
+    }
+    
+    public boolean isSubnetBanPublic() {
+        String key = "settings.message.subnetBan.public";
+        if(getString(key) == null) {
+            setProperty(key, true);
+        }
+        return getBoolean(key, true);
+    }
+    
+    public boolean isSubnetBanReasonPublic() {
+        String key = "settings.message.subnetBan.publicReason";
+        if(getString(key) == null) {
+            setProperty(key, true);
+        }
+        return getBoolean(key, true);
+    }
+    
+    public boolean isCountryBanPublic() {
+        String key = "settings.message.countryBan.public";
+        if(getString(key) == null) {
+            setProperty(key, true);
+        }
+        return getBoolean(key, true);
+    }
+    
+    public boolean isWhitelistPublic() {
+        String key = "settings.message.whitelist.public";
+        if(getString(key) == null) {
+            setProperty(key, true);
+        }
+        return getBoolean(key, true);
+    }
+    
     public static Settings getInstance() {
-        if(singleton != null) {
+        if(singleton == null) {
             singleton = new Settings();
         }
         return singleton;

@@ -26,6 +26,7 @@ import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.event.player.PlayerLoginEvent.Result;
 import uk.org.whoami.easyban.ConsoleLogger;
 import uk.org.whoami.easyban.settings.Message;
+import uk.org.whoami.easyban.settings.Settings;
 
 public class EasyBanPlayerListener extends PlayerListener {
 
@@ -59,6 +60,10 @@ public class EasyBanPlayerListener extends PlayerListener {
             if(banInfo.containsKey("until")) {
                 Long unixTime = Long.parseLong(banInfo.get("until"));                
                 kickmsg += " " + msg._("Until: ") + DateFormat.getDateTimeInstance().format(new Date(unixTime));
+            }
+            
+            if(Settings.getInstance().isAppendCustomBanMessageEnabled()) {
+                kickmsg += " " + msg._("custom_ban");
             }
             
             event.disallow(Result.KICK_BANNED, kickmsg);
@@ -105,6 +110,10 @@ public class EasyBanPlayerListener extends PlayerListener {
             if(banInfo.containsKey("until")) {
                 Long unixTime = Long.parseLong(banInfo.get("until"));                
                 kickmsg += " " + msg._("Until: ") + DateFormat.getDateTimeInstance().format(new Date(unixTime));
+            }
+            
+            if(Settings.getInstance().isAppendCustomBanMessageEnabled()) {
+                kickmsg += " " + msg._("custom_ban");
             }
             
             player.kickPlayer(kickmsg);

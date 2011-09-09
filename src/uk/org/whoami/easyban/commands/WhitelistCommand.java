@@ -19,6 +19,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import uk.org.whoami.easyban.ConsoleLogger;
 import uk.org.whoami.easyban.datasource.DataSource;
+import uk.org.whoami.easyban.settings.Settings;
 
 public class WhitelistCommand extends EasyBanCommand {
 
@@ -34,7 +35,11 @@ public class WhitelistCommand extends EasyBanCommand {
             return;
         }
         database.whitelist(args[0]);
-        cs.getServer().broadcastMessage(args[0] + m._(" has been whitelisted"));
+        
+        Settings settings = Settings.getInstance();
+        if(settings.isWhitelistPublic()) {
+            cs.getServer().broadcastMessage(args[0] + m._(" has been whitelisted"));
+        }
         ConsoleLogger.info(admin + " whitelisted " + args[0]);
     }
 }

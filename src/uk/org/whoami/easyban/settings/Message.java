@@ -31,44 +31,46 @@ public class Message extends Configuration {
     }
 
     private void loadDefaults() {
-        map.put(" has been kicked", " has been kicked");
-        map.put("You have been kicked", "You have been kicked");
-        map.put(" has been banned", " has been banned");
-        map.put("You have been banned", "You have been banned");
-        map.put(" has been unbanned", " has been unbanned");
-        map.put("Invalid Subnet", "Invalid Subnet");
-        map.put("Banned players: ", "Banned players: ");
-        map.put("Banned subnets: ", "Banned subnets: ");
-        map.put("Ips from ", "Ips from ");
-        map.put(" is not banned", " is not banned");
-        map.put(" is banned", " is banned");
-        map.put("Reason: ", "Reason: ");
-        map.put("Until: ", "Until: ");
-        map.put("Admin: ", "Admin: ");
-        map.put("Wrong time format", "Wrong time format");
-        map.put("You are banned until: ", "You are banned until: ");
-        map.put("You are banned", "You are banned");
-        map.put("Your country has been banned", "Your country has been banned");
-        map.put("Temporary bans: ", "Temporary bans: ");
-        map.put("A country has been banned: ", "A country has been banned: ");
-        map.put("A country has been unbanned: ", "A country has been unbanned: ");
-        map.put("Banned countries: ", "Banned countries: ");
-        map.put(" has been whitelisted", " has been whitelisted");
+        map.put(" has been kicked", " &chas been kicked");
+        map.put("You have been kicked", "&cYou have been kicked");
+        map.put(" has been banned", " &chas been banned");
+        map.put("You have been banned", "&cYou have been banned");
+        map.put(" has been unbanned", " &chas been unbanned");
+        map.put("Invalid Subnet", "&cInvalid Subnet");
+        map.put("Banned players: ", "&cBanned players: ");
+        map.put("Banned subnets: ", "&cBanned subnets: ");
+        map.put("Ips from ", "&cIps from ");
+        map.put(" is not banned", " &cis not banned");
+        map.put(" is banned", " &cis banned");
+        map.put("Reason: ", "&cReason: ");
+        map.put("Until: ", "&cUntil: ");
+        map.put("Admin: ", "&cAdmin: ");
+        map.put("Wrong time format", "&cWrong time format");
+        map.put("You are banned until: ", "&cYou are banned until: ");
+        map.put("You are banned", "&cYou are banned");
+        map.put("Your country has been banned", "&cYour country has been banned");
+        map.put("Temporary bans: ", "&cTemporary bans: ");
+        map.put("A country has been banned: ", "&cA country has been banned: ");
+        map.put("A country has been unbanned: ", "&cA country has been unbanned: ");
+        map.put("Banned countries: ", "&cBanned countries: ");
+        map.put(" has been whitelisted", " &chas been whitelisted");
         map.put(" has been removed from the whitelist",
-                " has been removed from the whitelist");
-        map.put("Whitelist: ", "Whitelist: ");
-        map.put("Alternative nicks of ", "Alternative nicks of ");
-        map.put("Your subnet is banned", "Your subnet is banned");
-        map.put("Users who connected from IP", "Users who connected from IP");
-        map.put("You have been banned by ","You have been banned by ");
+                " &chas been removed from the whitelist");
+        map.put("Whitelist: ", "&cWhitelist: ");
+        map.put("Alternative nicks of ", "&cAlternative nicks of ");
+        map.put("Your subnet is banned", "&cYour subnet is banned");
+        map.put("Users who connected from IP", "&cUsers who connected from IP");
+        map.put("You have been banned by ","&cYou have been banned by ");
+        map.put("custom_kick", "&cComplain on http://example.com");
+        map.put("custom_ban", "&cComplain on http://example.com");
     }
 
     public String _(String message) {
         String ret = map.get(message);
-        if(ret == null) {
-            return message;
+        if(ret != null) {
+            return ret.replace("&", "\u00a7");
         }
-        return ret;
+        return message;
     }
 
     private void getMessages() {

@@ -19,6 +19,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import uk.org.whoami.easyban.ConsoleLogger;
+import uk.org.whoami.easyban.settings.Settings;
 
 public class KickCommand extends EasyBanCommand {
 
@@ -33,14 +34,27 @@ public class KickCommand extends EasyBanCommand {
             String name = player.getDisplayName();
             
             String kickmsg = m._("You have been kicked");
+            String reason = "";
             if(args.length > 1) {
                 kickmsg += " " + m._("Reason: ");
                 for (int i = 1; i < args.length; i++) {
                     kickmsg += args[i] + " ";
+                    reason += args[i] + " ";
                 }
             }
+            
+            if(Settings.getInstance().isAppendCustomKickMessageEnabled()) {
+                kickmsg += " " + m._("custom_kick");
+            }
+            
             player.kickPlayer(kickmsg);
-            cs.getServer().broadcastMessage(name + m._(" has been kicked"));
+            Settings settings = Settings.getInstance();
+            if(settings.isKickPublic()) {
+                cs.getServer().broadcastMessage(name + m._(" has been kicked"));
+                if(!reason.isEmpty() && settings.isKickReasonPublic()) {
+                    cs.getServer().broadcastMessage(name + m._("Reason: ") + reason);
+                }
+            }
             ConsoleLogger.info(player.getName() + " has been kicked by " + admin);
         }
     }

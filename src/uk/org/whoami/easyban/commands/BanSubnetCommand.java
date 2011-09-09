@@ -19,6 +19,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import uk.org.whoami.easyban.ConsoleLogger;
 import uk.org.whoami.easyban.datasource.DataSource;
+import uk.org.whoami.easyban.settings.Settings;
 import uk.org.whoami.easyban.util.Subnet;
 
 public class BanSubnetCommand extends EasyBanCommand {
@@ -41,16 +42,26 @@ public class BanSubnetCommand extends EasyBanCommand {
         }
 
         if (subnet != null) {
+            String reason = null;
             if (args.length == 1) {
                 database.banSubnet(subnet, admin, null);
             } else {
-                String reason = "";
+                reason = "";
                 for (int i = 1; i < args.length; i++) {
                     reason += args[i] + " ";
                 }
                 database.banSubnet(subnet, admin, reason);
             }
-            cs.getServer().broadcastMessage(subnet.toString() + m._(" has been banned"));
+
+            Settings settings = Settings.getInstance();
+            if (settings.isSubnetBanPublic()) {
+                cs.getServer().broadcastMessage(subnet.toString() + m._(" has been banned"));
+            }
+
+            if (reason != null && settings.isSubnetBanReasonPublic()) {
+                cs.getServer().broadcastMessage(m._("Reason: ") + reason);
+            }
+
             ConsoleLogger.info(subnet.toString() + " has been banned by "
                     + admin);
         } else {
