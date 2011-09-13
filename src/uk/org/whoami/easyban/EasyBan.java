@@ -54,7 +54,9 @@ public class EasyBan extends JavaPlugin {
     @Override
     public void onDisable() {
         this.getServer().getScheduler().cancelTasks(this);
-        database.close();
+        if(database != null) {
+            database.close();
+        }
         ConsoleLogger.info("EasyBan disabled; Version: " + this.getDescription().getVersion());
     }
 

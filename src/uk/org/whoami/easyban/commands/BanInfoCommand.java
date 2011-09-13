@@ -50,8 +50,11 @@ public class BanInfoCommand extends EasyBanCommand {
                 cs.sendMessage(m._("Reason: ") + info.get("reason"));
             }
             if (info.containsKey("until")) {
-                Date until = new Date(new Long(info.get("until")));
-                cs.sendMessage(m._("Until: ") + DateFormat.getDateTimeInstance().format(until));
+                Long unix = new Long(info.get("until"));
+                if(unix != 100000) {
+                    Date until = new Date(unix);
+                    cs.sendMessage(m._("Until: ") + DateFormat.getDateTimeInstance().format(until));
+                }
             }
     }
 }
