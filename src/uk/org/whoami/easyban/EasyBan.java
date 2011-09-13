@@ -54,7 +54,7 @@ public class EasyBan extends JavaPlugin {
     @Override
     public void onDisable() {
         this.getServer().getScheduler().cancelTasks(this);
-        if(database != null) {
+        if (database != null) {
             database.close();
         }
         ConsoleLogger.info("EasyBan disabled; Version: " + this.getDescription().getVersion());
@@ -63,32 +63,34 @@ public class EasyBan extends JavaPlugin {
     @Override
     public void onEnable() {
         settings = Settings.getInstance();
-        String db = settings.getDatabase();
-
-        if (db.equals("yaml")) {
-            database = new YamlDataSource();
-        } else if (db.equals("hsql")) {
-            try {
-                database = new HSQLDataSource(this);
-            } catch (Exception ex) {
-                ConsoleLogger.info(ex.getMessage());
-                ConsoleLogger.info("Can't load database");
+        switch (settings.getDatabase()) {
+            case YAML:
+                database = new YamlDataSource();
+                break;
+            case MYSQL:
+                try {
+                    database = new MySQLDataSource(settings);
+                    break;
+                } catch (Exception ex) {
+                    ConsoleLogger.info(ex.getMessage());
+                    ConsoleLogger.info("Can't load database");
+                    this.getServer().getPluginManager().disablePlugin(this);
+                    return;
+                }
+            case HSQL:
+                try {
+                    database = new HSQLDataSource(this);
+                    break;
+                } catch (Exception ex) {
+                    ConsoleLogger.info(ex.getMessage());
+                    ConsoleLogger.info("Can't load database");
+                    this.getServer().getPluginManager().disablePlugin(this);
+                    return;
+                }
+            default:
+                ConsoleLogger.info("Unknown Database");
                 this.getServer().getPluginManager().disablePlugin(this);
                 return;
-            }
-        } else if (db.equals("mysql")) {
-            try {
-                database = new MySQLDataSource(settings);
-            } catch (Exception ex) {
-                ConsoleLogger.info(ex.getMessage());
-                ConsoleLogger.info("Can't load database");
-                this.getServer().getPluginManager().disablePlugin(this);
-                return;
-            }
-        } else {
-            ConsoleLogger.info("Unsupported database");
-            this.getServer().getPluginManager().disablePlugin(this);
-            return;
         }
 
         EasyBanPlayerListener l = new EasyBanPlayerListener(database);

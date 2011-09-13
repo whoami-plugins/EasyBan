@@ -17,6 +17,7 @@ package uk.org.whoami.easyban.settings;
 
 import java.io.File;
 import org.bukkit.util.config.Configuration;
+import uk.org.whoami.easyban.datasource.DataSourceType;
 
 public final class Settings extends Configuration {
     
@@ -57,12 +58,17 @@ public final class Settings extends Configuration {
         isAppendCustomBanMessageEnabled();
     }
 
-    public String getDatabase() {
+    public DataSourceType getDatabase() {
         String key = "database";
         if(getString(key) == null) {
             setProperty(key, "yaml");
         }
-        return getString(key);
+        
+        try {
+            return DataSourceType.valueOf(getString(key).toUpperCase());
+        } catch(IllegalArgumentException ex) {
+            return DataSourceType.YAML;
+        }
     }
     
     public String getMySQLDatabaseName() {

@@ -20,7 +20,7 @@ import java.util.HashMap;
 import uk.org.whoami.easyban.util.Subnet;
 
 public interface DataSource {
-
+    
     public void addIpToHistory(String nick,String ip);
 
     public void banNick(String nick,String admin,String reason, Calendar until);
@@ -54,3 +54,4 @@ public interface DataSource {
 
     public void close();
 }
+
