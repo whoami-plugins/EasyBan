@@ -12,6 +12,7 @@ import javax.naming.directory.Attributes;
 import javax.naming.directory.DirContext;
 import javax.naming.directory.InitialDirContext;
 import sun.net.dns.ResolverConfiguration;
+import uk.org.whoami.easyban.ConsoleLogger;
 
 public class DNSBL {
 
@@ -56,12 +57,14 @@ public class DNSBL {
                 Attribute attribute = attributes.get("A");
 
                 if (attribute != null) {
+                    ConsoleLogger.info("[DNSBL] " + ip + " listed on " + service);
                     return true;
                 }
             } catch (NameNotFoundException e) {
             } catch (NamingException e) {
             }
         }
+        ConsoleLogger.info("[DNSBL] " + ip + " is not listed");
         return false;
     }
 }
