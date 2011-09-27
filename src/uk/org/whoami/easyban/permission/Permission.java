@@ -12,7 +12,7 @@ public class Permission {
 
     public static boolean hasPermission(CommandSender sender, String cmd) {
         boolean perm = sender.hasPermission("easyban." + cmd.toLowerCase());
-        
+
         if (handler == null) {
             Plugin permissionsPlugin = sender.getServer().getPluginManager().getPlugin("Permissions");
             if (permissionsPlugin != null) {

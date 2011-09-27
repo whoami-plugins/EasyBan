@@ -63,6 +63,7 @@ public class Message extends Configuration {
         map.put("You have been banned by ","&cYou have been banned by ");
         map.put("custom_kick", "&cComplain on http://example.com");
         map.put("custom_ban", "&cComplain on http://example.com");
+        map.put("DNSBL Ban", "DNSBL Ban");
     }
 
     public String _(String message) {

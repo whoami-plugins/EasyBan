@@ -27,15 +27,17 @@ import org.bukkit.event.player.PlayerLoginEvent.Result;
 import uk.org.whoami.easyban.ConsoleLogger;
 import uk.org.whoami.easyban.settings.Message;
 import uk.org.whoami.easyban.settings.Settings;
+import uk.org.whoami.easyban.util.DNSBL;
 
 public class EasyBanPlayerListener extends PlayerListener {
 
     private DataSource database;
-    private Message msg;
+    private DNSBL dnsbl;
+    private Message msg = Message.getInstance();
 
-    public EasyBanPlayerListener(DataSource database) {
+    public EasyBanPlayerListener(DataSource database, DNSBL dnsbl) {
         this.database = database;
-        this.msg = Message.getInstance();
+        this.dnsbl = dnsbl;
     }
 
     @Override
@@ -49,23 +51,28 @@ public class EasyBanPlayerListener extends PlayerListener {
 
         database.addIpToHistory(name, ip);
 
+        if(dnsbl.isBlocked(ip)) {
+            event.disallow(Result.KICK_BANNED, msg._("DNSBL Ban"));
+            return;
+        }
+
         if (database.isNickBanned(name)) {
             HashMap<String, String> banInfo = database.getBanInformation(name);
             String kickmsg = msg._("You have been banned by ") + banInfo.get("admin");
-            
+
             if(banInfo.containsKey("reason")) {
                 kickmsg += " " + msg._("Reason: ") + banInfo.get("reason");
             }
-            
+
             if(banInfo.containsKey("until")) {
-                Long unixTime = Long.parseLong(banInfo.get("until"));                
+                Long unixTime = Long.parseLong(banInfo.get("until"));
                 kickmsg += " " + msg._("Until: ") + DateFormat.getDateTimeInstance().format(new Date(unixTime));
             }
-            
+
             if(Settings.getInstance().isAppendCustomBanMessageEnabled()) {
                 kickmsg += " " + msg._("custom_ban");
             }
-            
+
             event.disallow(Result.KICK_BANNED, kickmsg);
             ConsoleLogger.info("Ban for " + name + " detected");
             return;
@@ -88,7 +95,7 @@ public class EasyBanPlayerListener extends PlayerListener {
             ConsoleLogger.info("Subnet ban for " + name + "/" + ip + " detected");
         }
     }
-    
+
     //This event is only called when some other plugin overwrites the PlayerLogin event
     @Override
     public void onPlayerJoin(PlayerJoinEvent event) {
@@ -98,24 +105,24 @@ public class EasyBanPlayerListener extends PlayerListener {
         Player player = event.getPlayer();
         String name = player.getName();
         String ip = player.getAddress().getAddress().getHostAddress();
-          
+
         if (database.isNickBanned(name)) {
             HashMap<String, String> banInfo = database.getBanInformation(name);
             String kickmsg = msg._("You have been banned by ") + banInfo.get("admin");
-            
+
             if(banInfo.containsKey("reason")) {
                 kickmsg += " " + msg._("Reason: ") + banInfo.get("reason");
             }
-            
+
             if(banInfo.containsKey("until")) {
-                Long unixTime = Long.parseLong(banInfo.get("until"));                
+                Long unixTime = Long.parseLong(banInfo.get("until"));
                 kickmsg += " " + msg._("Until: ") + DateFormat.getDateTimeInstance().format(new Date(unixTime));
             }
-            
+
             if(Settings.getInstance().isAppendCustomBanMessageEnabled()) {
                 kickmsg += " " + msg._("custom_ban");
             }
-            
+
             player.kickPlayer(kickmsg);
             ConsoleLogger.info("Ban for " + name + " detected");
             return;

@@ -13,8 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package uk.org.whoami.easyban;
 
+import javax.naming.NamingException;
 import org.bukkit.event.Event;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -43,6 +45,7 @@ import uk.org.whoami.easyban.listener.EasyBanCountryListener;
 import uk.org.whoami.easyban.listener.EasyBanPlayerListener;
 import uk.org.whoami.easyban.settings.Settings;
 import uk.org.whoami.easyban.tasks.UnbanTask;
+import uk.org.whoami.easyban.util.DNSBL;
 import uk.org.whoami.geoip.GeoIPLookup;
 import uk.org.whoami.geoip.GeoIPTools;
 
@@ -87,17 +90,25 @@ public class EasyBan extends JavaPlugin {
                     this.getServer().getPluginManager().disablePlugin(this);
                     return;
                 }
-            default:
-                ConsoleLogger.info("Unknown Database");
-                this.getServer().getPluginManager().disablePlugin(this);
-                return;
         }
+        try {
+            DNSBL dnsbl = new DNSBL();
 
-        EasyBanPlayerListener l = new EasyBanPlayerListener(database);
-        this.getServer().getPluginManager().registerEvent(Event.Type.PLAYER_LOGIN,
-                l, Event.Priority.Lowest, this);
-        this.getServer().getPluginManager().registerEvent(Event.Type.PLAYER_JOIN,
-                l, Event.Priority.Lowest, this);
+            for (String bl : settings.getBlockLists()) {
+                dnsbl.addLookupService(bl);
+            }
+
+            EasyBanPlayerListener l = new EasyBanPlayerListener(database, dnsbl);
+            this.getServer().getPluginManager().registerEvent(Event.Type.PLAYER_LOGIN,
+                                                              l, Event.Priority.Lowest, this);
+            this.getServer().getPluginManager().registerEvent(Event.Type.PLAYER_JOIN,
+                                                              l, Event.Priority.Lowest, this);
+        } catch (NamingException ex) {
+            ConsoleLogger.info(ex.getMessage());
+            ConsoleLogger.info("DNSBL error");
+            this.getServer().getPluginManager().disablePlugin(this);
+            return;
+        }
 
         GeoIPLookup geo = getGeoIPLookup();
         if (geo != null) {
@@ -108,7 +119,7 @@ public class EasyBan extends JavaPlugin {
         }
 
         this.getServer().getScheduler().scheduleAsyncRepeatingTask(this,
-                new UnbanTask(database), 60L, 1200L);
+                                                                   new UnbanTask(database), 60L, 1200L);
 
         this.getCommand("ekick").setExecutor(new KickCommand());
         this.getCommand("eban").setExecutor(new BanCommand(database));
