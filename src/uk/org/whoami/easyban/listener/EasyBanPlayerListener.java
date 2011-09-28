@@ -51,11 +51,6 @@ public class EasyBanPlayerListener extends PlayerListener {
 
         database.addIpToHistory(name, ip);
 
-        if(dnsbl.isBlocked(ip)) {
-            event.disallow(Result.KICK_BANNED, msg._("DNSBL Ban"));
-            return;
-        }
-
         if (database.isNickBanned(name)) {
             HashMap<String, String> banInfo = database.getBanInformation(name);
             String kickmsg = msg._("You have been banned by ") + banInfo.get("admin");
@@ -87,6 +82,11 @@ public class EasyBanPlayerListener extends PlayerListener {
 
         if (database.isNickWhitelisted(event.getPlayer().getName())) {
             ConsoleLogger.info("Whitelist entry for " + name + " found");
+            return;
+        }
+
+        if(dnsbl.isBlocked(ip)) {
+            event.disallow(Result.KICK_BANNED, msg._("DNSBL Ban"));
             return;
         }
 
