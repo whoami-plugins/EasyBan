@@ -17,9 +17,11 @@
 package uk.org.whoami.easyban;
 
 import javax.naming.NamingException;
+
 import org.bukkit.event.Event;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
+
 import uk.org.whoami.easyban.commands.AlternativeCommand;
 import uk.org.whoami.easyban.commands.BanCommand;
 import uk.org.whoami.easyban.commands.BanCountryCommand;
@@ -32,6 +34,7 @@ import uk.org.whoami.easyban.commands.ListCountryBansCommand;
 import uk.org.whoami.easyban.commands.ListSubnetBansCommand;
 import uk.org.whoami.easyban.commands.ListTemporaryBansCommand;
 import uk.org.whoami.easyban.commands.ListWhitelistCommand;
+import uk.org.whoami.easyban.commands.ReloadCommand;
 import uk.org.whoami.easyban.commands.UnbanCommand;
 import uk.org.whoami.easyban.commands.UnbanCountryCommand;
 import uk.org.whoami.easyban.commands.UnbanSubnetCommand;
@@ -53,6 +56,7 @@ public class EasyBan extends JavaPlugin {
 
     private DataSource database;
     private Settings settings;
+    private DNSBL dnsbl;
 
     @Override
     public void onDisable() {
@@ -92,7 +96,7 @@ public class EasyBan extends JavaPlugin {
                 }
         }
         try {
-            DNSBL dnsbl = new DNSBL();
+            dnsbl = new DNSBL();
 
             for (String bl : settings.getBlockLists()) {
                 dnsbl.addLookupService(bl);
@@ -119,7 +123,7 @@ public class EasyBan extends JavaPlugin {
         }
 
         this.getServer().getScheduler().scheduleAsyncRepeatingTask(this,
-                                                                   new UnbanTask(database), 60L, 1200L);
+                new UnbanTask(database), 60L, 1200L);
 
         this.getCommand("ekick").setExecutor(new KickCommand());
         this.getCommand("eban").setExecutor(new BanCommand(database));
@@ -138,6 +142,7 @@ public class EasyBan extends JavaPlugin {
         this.getCommand("ewhitelist").setExecutor(new WhitelistCommand(database));
         this.getCommand("eunwhitelist").setExecutor(new UnwhitelistCommand(database));
         this.getCommand("elistwhite").setExecutor(new ListWhitelistCommand(database));
+        this.getCommand("ereload").setExecutor(new ReloadCommand(database,dnsbl));
 
         ConsoleLogger.info("EasyBan enabled; Version: " + this.getDescription().
                 getVersion());

@@ -141,6 +141,11 @@ public class MySQLDataSource extends SQLDataSource {
     }
 
     @Override
+    public void reload() {
+        //nothing todo
+    }
+
+    @Override
     public synchronized void close() {
         try {
             con.close();

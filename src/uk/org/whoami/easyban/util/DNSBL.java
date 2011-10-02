@@ -56,6 +56,10 @@ public class DNSBL {
         lookupServices.add(service);
     }
 
+    public void clearLookupService() {
+        lookupServices.clear();
+    }
+
     public boolean isBlocked(String ip) {
         String[] parts = ip.split("\\.");
         StringBuilder buffer = new StringBuilder();

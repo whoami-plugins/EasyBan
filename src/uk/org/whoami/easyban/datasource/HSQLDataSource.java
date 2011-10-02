@@ -128,6 +128,11 @@ public class HSQLDataSource extends SQLDataSource {
     }
 
     @Override
+    public void reload() {
+        //nothing todo
+    }
+
+    @Override
     public synchronized void close() {
         try {
             Statement st = con.createStatement();

@@ -19,7 +19,9 @@ package uk.org.whoami.easyban.settings;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+
 import org.bukkit.util.config.Configuration;
+
 import uk.org.whoami.easyban.ConsoleLogger;
 import uk.org.whoami.easyban.datasource.DataSource.DataSourceType;
 

@@ -73,5 +73,7 @@ public interface DataSource {
 
     public HashMap<String, String> getBanInformation(Subnet subnet);
 
+    public void reload();
+
     public void close();
 }

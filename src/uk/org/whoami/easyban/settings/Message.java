@@ -64,6 +64,7 @@ public class Message extends Configuration {
         map.put("custom_kick", "&cComplain on http://example.com");
         map.put("custom_ban", "&cComplain on http://example.com");
         map.put("DNSBL Ban", "DNSBL Ban");
+        map.put("Settings and database reloaded", "Settings and database reloaded");
     }
 
     public String _(String message) {

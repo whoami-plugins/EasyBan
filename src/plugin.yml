@@ -1,6 +1,6 @@
 name: EasyBan
 main: uk.org.whoami.easyban.EasyBan
-version: 2.1
+version: 2.2
 description: 'Ban people/subnets/countries from "offline" Servers'
 author: whoami
 website: 'http://dev.bukkit.org/server-mods/easyban/'
@@ -57,6 +57,9 @@ commands:
     elistwhite:
         description: Show whitelisted players
         usage: /elistwhite
+    reload:
+        description: Reload configuration file
+        usage: /ereload
 permissions:
     easyban.*:
         description: Gives access to all EasyBan commands

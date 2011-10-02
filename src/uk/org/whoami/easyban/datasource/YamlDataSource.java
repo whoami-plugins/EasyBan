@@ -44,31 +44,7 @@ public class YamlDataSource extends Configuration implements DataSource {
     @SuppressWarnings("unchecked")
     public YamlDataSource() {
         super(new File(Settings.DATABASE_FILE));
-        load();
-        if(getProperty(banPath) == null) {
-            setProperty(banPath,
-                    new HashMap<String, HashMap<String, String>>());
-        }
-        if(getProperty(historyPath) == null) {
-            setProperty(historyPath, new HashMap<String, List<String>>());
-        }
-        if(getProperty(subnetPath) == null) {
-            setProperty(subnetPath,
-                    new HashMap<String, HashMap<String, String>>());
-        }
-        if(getProperty(countryPath) == null) {
-            setProperty(countryPath, new ArrayList<String>());
-        }
-        if(getProperty(whitelistPath) == null) {
-            setProperty(whitelistPath, new ArrayList<String>());
-        }
-        history = (HashMap<String, List<String>>) getProperty(historyPath);
-        bans = (HashMap<String, HashMap<String, String>>) getProperty(banPath);
-        subnets = (HashMap<String, HashMap<String, String>>) getProperty(
-                subnetPath);
-        countries = (ArrayList<String>) getProperty(countryPath);
-        whitelist = (ArrayList<String>) getProperty(whitelistPath);
-        save();
+        reload();
     }
 
     @Override
@@ -268,6 +244,35 @@ public class YamlDataSource extends Configuration implements DataSource {
         } else {
             return null;
         }
+    }
+
+    @Override
+    public final void reload() {
+        load();
+        if(getProperty(banPath) == null) {
+            setProperty(banPath,
+                    new HashMap<String, HashMap<String, String>>());
+        }
+        if(getProperty(historyPath) == null) {
+            setProperty(historyPath, new HashMap<String, List<String>>());
+        }
+        if(getProperty(subnetPath) == null) {
+            setProperty(subnetPath,
+                    new HashMap<String, HashMap<String, String>>());
+        }
+        if(getProperty(countryPath) == null) {
+            setProperty(countryPath, new ArrayList<String>());
+        }
+        if(getProperty(whitelistPath) == null) {
+            setProperty(whitelistPath, new ArrayList<String>());
+        }
+        history = (HashMap<String, List<String>>) getProperty(historyPath);
+        bans = (HashMap<String, HashMap<String, String>>) getProperty(banPath);
+        subnets = (HashMap<String, HashMap<String, String>>) getProperty(
+                subnetPath);
+        countries = (ArrayList<String>) getProperty(countryPath);
+        whitelist = (ArrayList<String>) getProperty(whitelistPath);
+        save();
     }
 
     @Override
