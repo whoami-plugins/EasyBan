@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package uk.org.whoami.easyban.datasource;
 
 import java.net.InetAddress;
@@ -26,7 +27,9 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
+
 import org.hsqldb.types.Types;
+
 import uk.org.whoami.easyban.ConsoleLogger;
 import uk.org.whoami.easyban.util.Subnet;
 
@@ -35,7 +38,7 @@ public abstract class SQLDataSource implements DataSource {
     protected Connection con;
 
     protected abstract void connect() throws ClassNotFoundException,
-            SQLException;
+                                             SQLException;
 
     protected abstract void setup() throws SQLException;
 
@@ -45,15 +48,12 @@ public abstract class SQLDataSource implements DataSource {
     private synchronized void createNick(String nick) throws SQLException {
         PreparedStatement pst = null;
         try {
-            pst = con.prepareStatement(
-                    "SELECT player FROM player WHERE player=?");
+            pst = con.prepareStatement("INSERT INTO player (player) VALUES(?);");
             pst.setString(1, nick);
-            if (!pst.executeQuery().next()) {
-                pst.close();
-                pst = con.prepareStatement(
-                        "INSERT INTO player (player) VALUES(?);");
-                pst.setString(1, nick);
-                pst.executeUpdate();
+            pst.executeUpdate();
+        } catch (SQLException ex) {
+            if (ex.getErrorCode() != 1062) {   //Duplicate nick
+                throw ex;
             }
         } finally {
             if (pst != null) {
@@ -70,23 +70,17 @@ public abstract class SQLDataSource implements DataSource {
         PreparedStatement pst = null;
         try {
             createNick(nick);
-            pst = con.prepareStatement(
-                    "SELECT ip FROM ip "
-                    + "WHERE player_id=(SELECT player_id FROM player WHERE player= ?) AND ip=?;");
+            pst = con.prepareStatement("INSERT INTO ip (player_id,ip) VALUES("
+                    + "(SELECT player_id FROM player WHERE player= ? ),"
+                    + "?"
+                    + ");");
             pst.setString(1, nick);
             pst.setString(2, ip);
-            if (!pst.executeQuery().next()) {
-                pst.close();
-                pst = con.prepareStatement("INSERT INTO ip (player_id,ip) VALUES("
-                        + "(SELECT player_id FROM player WHERE player= ? ),"
-                        + "?"
-                        + ");");
-                pst.setString(1, nick);
-                pst.setString(2, ip);
-                pst.executeUpdate();
-            }
+            pst.executeUpdate();
         } catch (SQLException ex) {
-            ConsoleLogger.info(ex.getMessage());
+            if (ex.getErrorCode() != 1062) {   //Duplicate nick
+                ConsoleLogger.info(ex.getMessage());
+            }
         } finally {
             if (pst != null) {
                 try {
@@ -99,7 +93,7 @@ public abstract class SQLDataSource implements DataSource {
 
     @Override
     public synchronized void banNick(String nick, String admin, String reason,
-            Calendar until) {
+                                     Calendar until) {
         PreparedStatement pst = null;
         try {
             createNick(nick);
@@ -157,7 +151,7 @@ public abstract class SQLDataSource implements DataSource {
 
     @Override
     public synchronized void banSubnet(Subnet subnet, String admin,
-            String reason) {
+                                       String reason) {
         PreparedStatement pst = null;
         try {
             pst = con.prepareStatement("INSERT INTO subnet_ban (subnet,admin,reason) VALUES("

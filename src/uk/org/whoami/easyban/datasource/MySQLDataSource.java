@@ -13,11 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package uk.org.whoami.easyban.datasource;
 
 import java.sql.DriverManager;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+
 import uk.org.whoami.easyban.ConsoleLogger;
 import uk.org.whoami.easyban.settings.Settings;
 
@@ -46,7 +49,7 @@ public class MySQLDataSource extends SQLDataSource {
 
     @Override
     final protected synchronized void connect() throws ClassNotFoundException,
-            SQLException {
+                                                       SQLException {
         Class.forName("com.mysql.jdbc.Driver");
         ConsoleLogger.info("MySQL driver loaded");
         con = DriverManager.getConnection("jdbc:mysql://" + host + ":" + port
@@ -57,55 +60,80 @@ public class MySQLDataSource extends SQLDataSource {
     @Override
     final protected synchronized void setup() throws SQLException {
         Statement st = null;
+        ResultSet rs = null;
         try {
             st = con.createStatement();
-            st.executeUpdate("CREATE TABLE IF NOT EXISTS player ("
-                    + "player_id INTEGER AUTO_INCREMENT,"
-                    + "player VARCHAR(20) NOT NULL,"
-                    + "CONSTRAINT player_const_prim PRIMARY KEY (player_id),"
-                    + "CONSTRAINT player_const_uniq UNIQUE(player)"
+            st.executeUpdate("CREATE TABLE IF NOT EXISTS `player` ("
+                    + "`player_id` INTEGER AUTO_INCREMENT,"
+                    + "`player` VARCHAR(255) NOT NULL,"
+                    + "CONSTRAINT `player_const_prim` PRIMARY KEY (`player_id`),"
+                    + "CONSTRAINT `player_const_uniq` UNIQUE(`player`)"
                     + ");");
-            st.executeUpdate("CREATE TABLE IF NOT EXISTS ip ("
-                    + "ip_id INTEGER AUTO_INCREMENT,"
-                    + "player_id INTEGER NOT NULL,"
-                    + "ip VARCHAR(40) NOT NULL,"
-                    + "CONSTRAINT ip_const_prim PRIMARY KEY (ip_id),"
-                    + "CONSTRAINT ip_const_ref FOREIGN KEY (player_id) REFERENCES player (player_id)"
+            st.executeUpdate("CREATE TABLE IF NOT EXISTS `ip` ("
+                    + "`ip_id` INTEGER AUTO_INCREMENT,"
+                    + "`player_id` INTEGER NOT NULL,"
+                    + "`ip` VARCHAR(40) NOT NULL,"
+                    + "CONSTRAINT `ip_const_prim` PRIMARY KEY (`ip_id`),"
+                    + "CONSTRAINT `ip_const_uniq` UNIQUE (`player_id`, `ip`),"
+                    + "CONSTRAINT `ip_const_ref` FOREIGN KEY (`player_id`) REFERENCES `player` (`player_id`)"
                     + ");");
-            st.executeUpdate("CREATE TABLE IF NOT EXISTS player_ban ("
-                    + "player_ban_id INTEGER AUTO_INCREMENT,"
-                    + "player_id INTEGER NOT NULL,"
-                    + "admin VARCHAR(20) NOT NULL,"
-                    + "reason VARCHAR(100),"
-                    + "until TIMESTAMP,"
-                    + "CONSTRAINT player_ban_const_prim PRIMARY KEY (player_ban_id),"
-                    + "CONSTRAINT player_ban_const_uniq UNIQUE (player_id),"
-                    + "CONSTRAINT player_ban_const_ref FOREIGN KEY (player_id) REFERENCES player (player_id)"
+            st.executeUpdate("CREATE TABLE IF NOT EXISTS `player_ban` ("
+                    + "`player_ban_id` INTEGER AUTO_INCREMENT,"
+                    + "`player_id` INTEGER NOT NULL,"
+                    + "`admin` VARCHAR(255) NOT NULL,"
+                    + "`reason` VARCHAR(255),"
+                    + "`until` TIMESTAMP,"
+                    + "CONSTRAINT `player_ban_const_prim` PRIMARY KEY (`player_ban_id`),"
+                    + "CONSTRAINT `player_ban_const_uniq` UNIQUE (`player_id`),"
+                    + "CONSTRAINT `player_ban_const_ref` FOREIGN KEY (`player_id`) REFERENCES `player` (`player_id`)"
                     + ");");
-            st.executeUpdate("CREATE TABLE IF NOT EXISTS subnet_ban ("
-                    + "subnet_ban_id INTEGER AUTO_INCREMENT,"
-                    + "subnet VARCHAR(100) NOT NULL,"
-                    + "admin VARCHAR(20) NOT NULL,"
-                    + "reason VARCHAR(100),"
-                    + "CONSTRAINT subnet_ban_const_prim PRIMARY KEY (subnet_ban_id),"
-                    + "CONSTRAINT subnet_ban_const_uniq UNIQUE (subnet)"
+            st.executeUpdate("CREATE TABLE IF NOT EXISTS `subnet_ban` ("
+                    + "`subnet_ban_id` INTEGER AUTO_INCREMENT,"
+                    + "`subnet` VARCHAR(100) NOT NULL,"
+                    + "`admin` VARCHAR(255) NOT NULL,"
+                    + "`reason` VARCHAR(255),"
+                    + "CONSTRAINT `subnet_ban_const_prim` PRIMARY KEY (`subnet_ban_id`),"
+                    + "CONSTRAINT `subnet_ban_const_uniq` UNIQUE (`subnet`)"
                     + ");");
-            st.executeUpdate("CREATE TABLE IF NOT EXISTS country_ban ("
-                    + "country_ban_id INTEGER AUTO_INCREMENT,"
-                    + "country VARCHAR(2) NOT NULL,"
-                    + "CONSTRAINT country_ban_const_prim PRIMARY KEY (country_ban_id),"
-                    + "CONSTRAINT country_ban_const_uniq UNIQUE (country)"
+            st.executeUpdate("CREATE TABLE IF NOT EXISTS `country_ban` ("
+                    + "`country_ban_id` INTEGER AUTO_INCREMENT,"
+                    + "`country` VARCHAR(2) NOT NULL,"
+                    + "CONSTRAINT `country_ban_const_prim` PRIMARY KEY (`country_ban_id`),"
+                    + "CONSTRAINT `country_ban_const_uniq` UNIQUE (`country`)"
                     + ");");
-            st.executeUpdate("CREATE TABLE IF NOT EXISTS whitelist ("
-                    + "whitelist_id INTEGER AUTO_INCREMENT,"
-                    + "player_id INTEGER NOT NULL,"
-                    + "CONSTRAINT whitelist_const_prim PRIMARY KEY (whitelist_id),"
-                    + "CONSTRAINT whitelist_const_ref FOREIGN KEY (player_id) REFERENCES player (player_id)"
+            st.executeUpdate("CREATE TABLE IF NOT EXISTS `whitelist` ("
+                    + "`whitelist_id` INTEGER AUTO_INCREMENT,"
+                    + "`player_id` INTEGER NOT NULL,"
+                    + "CONSTRAINT `whitelist_const_prim` PRIMARY KEY (`whitelist_id`),"
+                    + "CONSTRAINT `whitelist_const_uniq` UNIQUE (`player_id`),"
+                    + "CONSTRAINT `whitelist_const_ref` FOREIGN KEY (`player_id`) REFERENCES `player` (`player_id`)"
                     + ");");
+
+            //update old tables
+            rs = con.getMetaData().getIndexInfo(con.getCatalog(), null, "ip", true, true);
+            while (rs.next()) {
+                if (rs.getString("INDEX_NAME").equalsIgnoreCase("ip_const_uniq")) {
+                    return;
+                }
+            }
+
+            st.executeUpdate("ALTER TABLE `player` MODIFY `player` VARCHAR(255);");
+            st.executeUpdate("ALTER TABLE `ip` ADD CONSTRAINT `ip_const_uniq` UNIQUE (`player_id`, `ip`);");
+            st.executeUpdate("ALTER TABLE `player_ban` MODIFY `admin` VARCHAR(255);");
+            st.executeUpdate("ALTER TABLE `player_ban` MODIFY `reason` VARCHAR(255);");
+            st.executeUpdate("ALTER TABLE `subnet_ban` MODIFY `admin` VARCHAR(255);");
+            st.executeUpdate("ALTER TABLE `subnet_ban` MODIFY `reason` VARCHAR(255);");
+            st.executeUpdate("ALTER TABLE `whitelist` ADD CONSTRAINT `whitelist_const_uniq` UNIQUE (`player_id`);");
         } finally {
             if (st != null) {
                 try {
                     st.close();
+                } catch (SQLException ex) {
+                }
+            }
+            if (rs != null) {
+                try {
+                    rs.close();
                 } catch (SQLException ex) {
                 }
             }
