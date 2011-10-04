@@ -17,9 +17,11 @@ package uk.org.whoami.easyban.commands;
 
 import java.text.DateFormat;
 import java.util.Calendar;
+
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+
 import uk.org.whoami.easyban.ConsoleLogger;
 import uk.org.whoami.easyban.datasource.DataSource;
 import uk.org.whoami.easyban.settings.Settings;
@@ -77,11 +79,11 @@ public class BanCommand extends EasyBanCommand {
             if(settings.isAppendCustomBanMessageEnabled()) {
                 kickmsg += " " + m._("custom_ban");
             }
-            
+
             player.kickPlayer(kickmsg);
         }
         database.banNick(playerNick, admin, reason, until);
-        
+
 
         if (settings.isBanPublic()) {
             cs.getServer().broadcastMessage(playerNick + m._(" has been banned"));
