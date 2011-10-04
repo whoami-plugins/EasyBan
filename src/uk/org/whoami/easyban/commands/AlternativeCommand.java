@@ -19,12 +19,14 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collections;
+
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+
 import uk.org.whoami.easyban.datasource.DataSource;
 
 public class AlternativeCommand extends EasyBanCommand {
-    
+
     private DataSource database;
 
     public AlternativeCommand(DataSource database) {
@@ -50,5 +52,5 @@ public class AlternativeCommand extends EasyBanCommand {
                 this.sendListToSender(cs, nicks.toArray(new String[0]));
             }
     }
-    
+
 }
