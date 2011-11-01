@@ -648,6 +648,9 @@ public abstract class SQLDataSource implements DataSource {
             }
         }
 
+        if (map.isEmpty()){
+            return null;
+        }
         return map;
     }
 }
