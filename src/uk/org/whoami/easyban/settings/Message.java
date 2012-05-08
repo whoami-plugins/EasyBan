@@ -16,16 +16,21 @@
 package uk.org.whoami.easyban.settings;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
-import org.bukkit.util.config.Configuration;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 
-public class Message extends Configuration {
+public class Message {
 
     private static Message singleton = null;
     private final HashMap<String, String> map = new HashMap<String, String>();
 
+    private FileConfiguration customConfig = null;
+    private File customConfigFile = null;
+
     private Message() {
-        super(new File(Settings.MESSAGE_FILE));
+        customConfigFile = new File(Settings.MESSAGE_FILE);
         loadDefaults();
         getMessages();
     }
@@ -76,15 +81,21 @@ public class Message extends Configuration {
     }
 
     private void getMessages() {
-        this.load();
+        customConfig = YamlConfiguration.loadConfiguration(customConfigFile);
+
         for(String key : map.keySet()) {
-            if(this.getString(key) == null) {
-                this.setProperty(key, map.get(key));
+            if(this.customConfig.getString(key) == null) {
+                this.customConfig.set(key, map.get(key));
             } else {
-                map.put(key, this.getString(key));
+                map.put(key, this.customConfig.getString(key));
             }
         }
-        this.save();
+
+        try {
+            customConfig.save(customConfigFile);
+        } catch (IOException ex) {
+            uk.org.whoami.geoip.util.ConsoleLogger.info("Error:" + ex.getMessage());
+        }
     }
 
     public static Message getInstance() {

@@ -19,17 +19,19 @@ import java.text.DateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
-import uk.org.whoami.easyban.datasource.DataSource;
-import org.bukkit.event.player.PlayerListener;
 import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.event.player.PlayerLoginEvent.Result;
 import uk.org.whoami.easyban.ConsoleLogger;
+import uk.org.whoami.easyban.datasource.DataSource;
 import uk.org.whoami.easyban.settings.Message;
 import uk.org.whoami.easyban.settings.Settings;
 import uk.org.whoami.easyban.util.DNSBL;
 
-public class EasyBanPlayerListener extends PlayerListener {
+public class EasyBanPlayerListener implements Listener {
 
     private DataSource database;
     private DNSBL dnsbl;
@@ -40,7 +42,7 @@ public class EasyBanPlayerListener extends PlayerListener {
         this.dnsbl = dnsbl;
     }
 
-    @Override
+    @EventHandler(priority = EventPriority.LOWEST)
     public void onPlayerLogin(PlayerLoginEvent event) {
         if (event.getPlayer() == null || !event.getResult().equals(Result.ALLOWED)) {
             return;
@@ -97,7 +99,7 @@ public class EasyBanPlayerListener extends PlayerListener {
     }
 
     //This event is only called when some other plugin overwrites the PlayerLogin event
-    @Override
+    @EventHandler(priority = EventPriority.LOWEST)
     public void onPlayerJoin(PlayerJoinEvent event) {
         if (event.getPlayer() == null) {
             return;

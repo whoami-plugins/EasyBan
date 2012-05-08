@@ -17,29 +17,9 @@
 package uk.org.whoami.easyban;
 
 import javax.naming.NamingException;
-
-import org.bukkit.event.Event;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
-
-import uk.org.whoami.easyban.commands.AlternativeCommand;
-import uk.org.whoami.easyban.commands.BanCommand;
-import uk.org.whoami.easyban.commands.BanCountryCommand;
-import uk.org.whoami.easyban.commands.BanInfoCommand;
-import uk.org.whoami.easyban.commands.BanSubnetCommand;
-import uk.org.whoami.easyban.commands.HistoryCommand;
-import uk.org.whoami.easyban.commands.KickCommand;
-import uk.org.whoami.easyban.commands.ListBansCommand;
-import uk.org.whoami.easyban.commands.ListCountryBansCommand;
-import uk.org.whoami.easyban.commands.ListSubnetBansCommand;
-import uk.org.whoami.easyban.commands.ListTemporaryBansCommand;
-import uk.org.whoami.easyban.commands.ListWhitelistCommand;
-import uk.org.whoami.easyban.commands.ReloadCommand;
-import uk.org.whoami.easyban.commands.UnbanCommand;
-import uk.org.whoami.easyban.commands.UnbanCountryCommand;
-import uk.org.whoami.easyban.commands.UnbanSubnetCommand;
-import uk.org.whoami.easyban.commands.UnwhitelistCommand;
-import uk.org.whoami.easyban.commands.WhitelistCommand;
+import uk.org.whoami.easyban.commands.*;
 import uk.org.whoami.easyban.datasource.DataSource;
 import uk.org.whoami.easyban.datasource.HSQLDataSource;
 import uk.org.whoami.easyban.datasource.MySQLDataSource;
@@ -102,11 +82,9 @@ public class EasyBan extends JavaPlugin {
                 dnsbl.addLookupService(bl);
             }
 
-            EasyBanPlayerListener l = new EasyBanPlayerListener(database, dnsbl);
-            this.getServer().getPluginManager().registerEvent(Event.Type.PLAYER_LOGIN,
-                                                              l, Event.Priority.Lowest, this);
-            this.getServer().getPluginManager().registerEvent(Event.Type.PLAYER_JOIN,
-                                                              l, Event.Priority.Lowest, this);
+            this.getServer().getPluginManager().registerEvents(
+                    new EasyBanPlayerListener(database, dnsbl), this);
+
         } catch (NamingException ex) {
             ConsoleLogger.info(ex.getMessage());
             ConsoleLogger.info("DNSBL error");
@@ -116,10 +94,8 @@ public class EasyBan extends JavaPlugin {
 
         GeoIPLookup geo = getGeoIPLookup();
         if (geo != null) {
-            this.getServer().getPluginManager().registerEvent(
-                    Event.Type.PLAYER_LOGIN,
-                    new EasyBanCountryListener(database, geo),
-                    Event.Priority.Lowest, this);
+            this.getServer().getPluginManager().registerEvents(
+                    new EasyBanCountryListener(database, geo), this);
         }
 
         this.getServer().getScheduler().scheduleAsyncRepeatingTask(this,

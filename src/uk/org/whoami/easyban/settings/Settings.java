@@ -17,15 +17,15 @@
 package uk.org.whoami.easyban.settings;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-
-import org.bukkit.util.config.Configuration;
-
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 import uk.org.whoami.easyban.ConsoleLogger;
 import uk.org.whoami.easyban.datasource.DataSource.DataSourceType;
 
-public final class Settings extends Configuration {
+public final class Settings {
 
     public static final String PLUGIN_FOLDER = "./plugins/EasyBan";
     public static final String MESSAGE_FILE = Settings.PLUGIN_FOLDER + "/messages.yml";
@@ -33,15 +33,22 @@ public final class Settings extends Configuration {
     public static final String DATABASE_FILE = Settings.PLUGIN_FOLDER + "/bans.yml";
     private static Settings singleton;
 
+    private FileConfiguration customConfig = null;
+    private File customConfigFile = null;
+
     private Settings() {
-        super(new File(Settings.SETTINGS_FILE));
+        customConfigFile = new File(Settings.SETTINGS_FILE);
         reload();
     }
 
     public void reload() {
-        load();
+        customConfig = YamlConfiguration.loadConfiguration(customConfigFile);
         write();
-        save();
+        try {
+            customConfig.save(customConfigFile);
+        } catch (IOException ex) {
+            uk.org.whoami.geoip.util.ConsoleLogger.info("Error:" + ex.getMessage());
+        }
     }
 
     private void write() {
@@ -66,12 +73,12 @@ public final class Settings extends Configuration {
 
     public DataSourceType getDatabase() {
         String key = "database";
-        if (getString(key) == null) {
-            setProperty(key, "yaml");
+        if (customConfig.getString(key) == null) {
+            customConfig.set(key, "yaml");
         }
 
         try {
-            return DataSourceType.valueOf(getString(key).toUpperCase());
+            return DataSourceType.valueOf(customConfig.getString(key).toUpperCase());
         } catch (IllegalArgumentException ex) {
             ConsoleLogger.info("Unknown database type; default to YAML");
             return DataSourceType.YAML;
@@ -80,155 +87,155 @@ public final class Settings extends Configuration {
 
     public String getMySQLDatabaseName() {
         String key = "MySQLDatabaseName";
-        if (getString("schema") != null) {
-            String s = getString("schema");
-            removeProperty("schema");
-            setProperty(key, s);
+        if (customConfig.getString("schema") != null) {
+            String s = customConfig.getString("schema");
+            customConfig.set("schema", null);
+            customConfig.set(key, s);
         }
-        if (getString(key) == null) {
-            setProperty(key, "easyban");
+        if (customConfig.getString(key) == null) {
+            customConfig.set(key, "easyban");
         }
-        return getString(key);
+        return customConfig.getString(key);
     }
 
     public String getMySQLHost() {
         String key = "MySQLHost";
-        if (getString("host") != null) {
-            String s = getString("host");
-            removeProperty("host");
-            setProperty(key, s);
+        if (customConfig.getString("host") != null) {
+            String s = customConfig.getString("host");
+            customConfig.set("host", null);
+            customConfig.set(key, s);
         }
-        if (getString(key) == null) {
-            setProperty(key, "127.0.0.1");
+        if (customConfig.getString(key) == null) {
+            customConfig.set(key, "127.0.0.1");
         }
-        return getString(key);
+        return customConfig.getString(key);
     }
 
     public String getMySQLPort() {
         String key = "MySQLPort";
-        if (getString("port") != null) {
-            String s = getString("port");
-            removeProperty("port");
-            setProperty(key, s);
+        if (customConfig.getString("port") != null) {
+            String s = customConfig.getString("port");
+            customConfig.set("port", null);
+            customConfig.set(key, s);
         }
-        if (getString(key) == null) {
-            setProperty(key, "3306");
+        if (customConfig.getString(key) == null) {
+            customConfig.set(key, "3306");
         }
-        return getString(key);
+        return customConfig.getString(key);
     }
 
     public String getMySQLUsername() {
         String key = "MySQLUsername";
-        if (getString("username") != null) {
-            String s = getString("username");
-            removeProperty("username");
-            setProperty(key, s);
+        if (customConfig.getString("username") != null) {
+            String s = customConfig.getString("username");
+            customConfig.set("username", null);
+            customConfig.set(key, s);
         }
-        if (getString(key) == null) {
-            setProperty(key, "easyban");
+        if (customConfig.getString(key) == null) {
+            customConfig.set(key, "easyban");
         }
-        return getString(key);
+        return customConfig.getString(key);
     }
 
     public String getMySQLPassword() {
         String key = "MySQLPassword";
-        if (getString("password") != null) {
-            String s = getString("password");
-            removeProperty("password");
-            setProperty(key, s);
+        if (customConfig.getString("password") != null) {
+            String s = customConfig.getString("password");
+            customConfig.set("password", null);
+            customConfig.set(key, s);
         }
-        if (getString(key) == null) {
-            setProperty(key, "CHANGEME");
+        if (customConfig.getString(key) == null) {
+            customConfig.set(key, "CHANGEME");
         }
-        return getString(key);
+        return customConfig.getString(key);
     }
 
     public boolean isKickPublic() {
         String key = "settings.message.kick.public";
-        if (getString(key) == null) {
-            setProperty(key, true);
+        if (customConfig.getString(key) == null) {
+            customConfig.set(key, true);
         }
-        return getBoolean(key, true);
+        return customConfig.getBoolean(key, true);
     }
 
     public boolean isKickReasonPublic() {
         String key = "settings.message.kick.publicReason";
-        if (getString(key) == null) {
-            setProperty(key, true);
+        if (customConfig.getString(key) == null) {
+            customConfig.set(key, true);
         }
-        return getBoolean(key, true);
+        return customConfig.getBoolean(key, true);
     }
 
     public boolean isAppendCustomKickMessageEnabled() {
         String key = "settings.message.kick.appendCustomMessage";
-        if (getString(key) == null) {
-            setProperty(key, false);
+        if (customConfig.getString(key) == null) {
+            customConfig.set(key, false);
         }
-        return getBoolean(key, false);
+        return customConfig.getBoolean(key, false);
     }
 
     public boolean isBanPublic() {
         String key = "settings.message.ban.public";
-        if (getString(key) == null) {
-            setProperty(key, true);
+        if (customConfig.getString(key) == null) {
+            customConfig.set(key, true);
         }
-        return getBoolean(key, true);
+        return customConfig.getBoolean(key, true);
     }
 
     public boolean isBanReasonPublic() {
         String key = "settings.message.ban.publicReason";
-        if (getString(key) == null) {
-            setProperty(key, true);
+        if (customConfig.getString(key) == null) {
+            customConfig.set(key, true);
         }
-        return getBoolean(key, true);
+        return customConfig.getBoolean(key, true);
     }
 
     public boolean isBanUntilPublic() {
         String key = "settings.message.ban.publicUntil";
-        if (getString(key) == null) {
-            setProperty(key, true);
+        if (customConfig.getString(key) == null) {
+            customConfig.set(key, true);
         }
-        return getBoolean(key, true);
+        return customConfig.getBoolean(key, true);
     }
 
     public boolean isAppendCustomBanMessageEnabled() {
         String key = "settings.message.ban.appendCustomMessage";
-        if (getString(key) == null) {
-            setProperty(key, false);
+        if (customConfig.getString(key) == null) {
+            customConfig.set(key, false);
         }
-        return getBoolean(key, false);
+        return customConfig.getBoolean(key, false);
     }
 
     public boolean isSubnetBanPublic() {
         String key = "settings.message.subnetBan.public";
-        if (getString(key) == null) {
-            setProperty(key, true);
+        if (customConfig.getString(key) == null) {
+            customConfig.set(key, true);
         }
-        return getBoolean(key, true);
+        return customConfig.getBoolean(key, true);
     }
 
     public boolean isSubnetBanReasonPublic() {
         String key = "settings.message.subnetBan.publicReason";
-        if (getString(key) == null) {
-            setProperty(key, true);
+        if (customConfig.getString(key) == null) {
+            customConfig.set(key, true);
         }
-        return getBoolean(key, true);
+        return customConfig.getBoolean(key, true);
     }
 
     public boolean isCountryBanPublic() {
         String key = "settings.message.countryBan.public";
-        if (getString(key) == null) {
-            setProperty(key, true);
+        if (customConfig.getString(key) == null) {
+            customConfig.set(key, true);
         }
-        return getBoolean(key, true);
+        return customConfig.getBoolean(key, true);
     }
 
     public boolean isWhitelistPublic() {
         String key = "settings.message.whitelist.public";
-        if (getString(key) == null) {
-            setProperty(key, true);
+        if (customConfig.getString(key) == null) {
+            customConfig.set(key, true);
         }
-        return getBoolean(key, true);
+        return customConfig.getBoolean(key, true);
     }
 
     public List<String> getBlockLists() {
@@ -238,11 +245,10 @@ public final class Settings extends Configuration {
         def.add("dnsbl.proxybl.org");
         def.add("tor.dnsbl.sectoor.de");
 
-        if(this.getList(key) == null) {
-            setProperty(key,def);
+        if(customConfig.getList(key) == null) {
+            customConfig.set(key,def);
         }
-
-        return this.getStringList(key, def);
+        return customConfig.getStringList(key);
     }
 
     public static Settings getInstance() {

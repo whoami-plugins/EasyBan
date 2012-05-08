@@ -16,19 +16,18 @@
 package uk.org.whoami.easyban.datasource;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 import java.util.Map.Entry;
-import org.bukkit.util.config.Configuration;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 import uk.org.whoami.easyban.settings.Settings;
 import uk.org.whoami.easyban.util.Subnet;
+import uk.org.whoami.geoip.util.ConsoleLogger;
 
-public class YamlDataSource extends Configuration implements DataSource {
+public class YamlDataSource implements DataSource {
 
     private final String banPath = "bans";
     private final String historyPath = "history";
@@ -41,9 +40,12 @@ public class YamlDataSource extends Configuration implements DataSource {
     private ArrayList<String> countries;
     private ArrayList<String> whitelist;
 
+    private FileConfiguration customConfig = null;
+    private File customConfigFile = null;
+
     @SuppressWarnings("unchecked")
     public YamlDataSource() {
-        super(new File(Settings.DATABASE_FILE));
+        customConfigFile = new File(Settings.DATABASE_FILE);
         reload();
     }
 
@@ -248,31 +250,40 @@ public class YamlDataSource extends Configuration implements DataSource {
 
     @Override
     public final void reload() {
-        load();
-        if(getProperty(banPath) == null) {
-            setProperty(banPath,
+        customConfig = YamlConfiguration.loadConfiguration(customConfigFile);
+
+        if(customConfig.get(banPath) == null) {
+            customConfig.set(banPath,
                     new HashMap<String, HashMap<String, String>>());
         }
-        if(getProperty(historyPath) == null) {
-            setProperty(historyPath, new HashMap<String, List<String>>());
+        if(customConfig.get(historyPath) == null) {
+            customConfig.set(historyPath, new HashMap<String, List<String>>());
         }
-        if(getProperty(subnetPath) == null) {
-            setProperty(subnetPath,
+        if(customConfig.get(subnetPath) == null) {
+            customConfig.set(subnetPath,
                     new HashMap<String, HashMap<String, String>>());
         }
-        if(getProperty(countryPath) == null) {
-            setProperty(countryPath, new ArrayList<String>());
+        if(customConfig.get(countryPath) == null) {
+            customConfig.set(countryPath, new ArrayList<String>());
         }
-        if(getProperty(whitelistPath) == null) {
-            setProperty(whitelistPath, new ArrayList<String>());
+        if(customConfig.get(whitelistPath) == null) {
+            customConfig.set(whitelistPath, new ArrayList<String>());
         }
-        history = (HashMap<String, List<String>>) getProperty(historyPath);
-        bans = (HashMap<String, HashMap<String, String>>) getProperty(banPath);
-        subnets = (HashMap<String, HashMap<String, String>>) getProperty(
+        history = (HashMap<String, List<String>>) customConfig.get(historyPath);
+        bans = (HashMap<String, HashMap<String, String>>) customConfig.get(banPath);
+        subnets = (HashMap<String, HashMap<String, String>>) customConfig.get(
                 subnetPath);
-        countries = (ArrayList<String>) getProperty(countryPath);
-        whitelist = (ArrayList<String>) getProperty(whitelistPath);
+        countries = (ArrayList<String>) customConfig.get(countryPath);
+        whitelist = (ArrayList<String>) customConfig.get(whitelistPath);
         save();
+    }
+
+    private void save() {
+        try {
+            customConfig.save(customConfigFile);
+        } catch (IOException ex) {
+            ConsoleLogger.info("Error:" + ex.getMessage());
+        }
     }
 
     @Override
